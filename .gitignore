@@ -3,3 +3,4 @@ bin/*
 /src/bin
 /src/obj
 /src/packages
+src/Clipboard Manager.csproj.user
