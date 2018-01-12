@@ -24,7 +24,6 @@ namespace ClipboardManager
         private const int MaxClipCount = 30;
         
         private readonly Icon mainIcon = Icon.FromHandle(Resources.clip.GetHicon());
-        private readonly Icon flashIcon = Icon.FromHandle(Resources.clip_flash.GetHicon());
         private readonly Icon disabledIcon = Icon.FromHandle(Resources.clip_disabled.GetHicon());
 
         private Lazy<Configuration> configuration = new Lazy<Configuration>(() => Configuration.Load());
@@ -460,9 +459,6 @@ namespace ClipboardManager
 
             if (e.ClipItem != ClipItem.Empty)
             {
-                trayIcon.Icon = flashIcon;
-                timer.Start();
-
                 if (Configuration.AlwaysShowNotifications || e.ClipItem != e.PreviousClipItem)
                 {
                     ShowNotifications();

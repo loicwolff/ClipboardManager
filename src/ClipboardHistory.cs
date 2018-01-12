@@ -22,8 +22,7 @@ namespace ClipboardManager
         public event EventHandler<NewClipItemEventEventArgs> OnHistoryChanged;
 
         private const string JsonClipsFile = "clips.json";
-        private const string XmlClipsFile = "clips.xml";
-
+        
         private const int MaxClipCount = 30;
         
         /// <summary>

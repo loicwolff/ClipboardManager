@@ -21,7 +21,7 @@ namespace ClipboardManager
             {
                 ClickOnceHelper.AddShortcutToStartupGroup("Clipboard Manager", "Clipboard Manager");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 //Trace.TraceWarning("Cannot add to startup group. Exception: {0}", ex.Message);
             }
