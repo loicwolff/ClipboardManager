@@ -1,25 +1,25 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.27130.2020
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Clipboard Manager", "Clipboard Manager.csproj", "{84424EE2-5F15-4283-B2BE-A83F95114B27}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|x86 = Debug|x86
-		Deploy|x86 = Deploy|x86
-		Release|x86 = Release|x86
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{84424EE2-5F15-4283-B2BE-A83F95114B27}.Debug|x86.ActiveCfg = Debug|x86
-		{84424EE2-5F15-4283-B2BE-A83F95114B27}.Debug|x86.Build.0 = Debug|x86
-		{84424EE2-5F15-4283-B2BE-A83F95114B27}.Deploy|x86.ActiveCfg = Deploy|x86
-		{84424EE2-5F15-4283-B2BE-A83F95114B27}.Deploy|x86.Build.0 = Deploy|x86
-		{84424EE2-5F15-4283-B2BE-A83F95114B27}.Release|x86.ActiveCfg = Release|x86
-		{84424EE2-5F15-4283-B2BE-A83F95114B27}.Release|x86.Build.0 = Release|x86
+		{84424EE2-5F15-4283-B2BE-A83F95114B27}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{84424EE2-5F15-4283-B2BE-A83F95114B27}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{84424EE2-5F15-4283-B2BE-A83F95114B27}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{84424EE2-5F15-4283-B2BE-A83F95114B27}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {25059F29-B080-4B27-8025-1C1DF04390AD}
 	EndGlobalSection
 EndGlobal
