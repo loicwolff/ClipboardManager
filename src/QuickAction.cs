@@ -92,30 +92,7 @@ namespace ClipboardManager
             get { return true; }
         }
     }
-
-    /// <summary>
-    /// Quick Action pour la PFTL
-    /// </summary>
-    public class PftlQuickAction : QuickAction
-    {
-        /// <summary>
-        /// Ajoute les informations de date nécessaires au fonctionnement de la PFTL
-        /// </summary>
-        public override Func<string> GetUrlComplement
-        {
-            get
-            {
-                return () =>
-                {
-                    string inf = DateTime.Now.AddHours(-1).ToString("'&date_inf='dd'%2F'MM'%2F'yyyy'&heure_inf='HH'%3A'mm'%3A'ss");
-                    string sup = DateTime.Now.ToString("'&date_sup='dd'%2F'MM'%2F'yyyy'&heure_sup=23%3A59%3A59'");
-
-                    return String.Concat(inf, sup);
-                };
-            }
-        }
-    }
-
+    
     /// <summary>
     /// Quick action qui ouvre une application installée sur le poste
     /// </summary>
