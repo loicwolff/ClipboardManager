@@ -171,7 +171,6 @@
     <Content Include="Resources\clip.ico" />
     <Content Include="Resources\clip.png" />
     <Content Include="Resources\clip_disabled.png" />
-    <None Include="Resources\clip_flash.png" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.0">
