@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using ClipboardManager.Properties;
@@ -77,6 +78,17 @@ namespace ClipboardManager
                 Text = "Clipboard Manager",
             };
 
+            // add left click to the systray icon
+            // source: https://stackoverflow.com/a/3581311/12008
+            trayIcon.MouseClick += (sender, mouseEvent) =>
+            {
+                if (mouseEvent.Button == MouseButtons.Left)
+                {
+                    MethodInfo mi = typeof(NotifyIcon).GetMethod("ShowContextMenu", BindingFlags.Instance | BindingFlags.NonPublic);
+                    mi.Invoke(trayIcon, null);
+                }
+            };
+
             timer = new Timer
             {
                 Interval = 400,
@@ -134,9 +146,9 @@ namespace ClipboardManager
 
             DrawMenuItems();
         }
-
-        #endregion
         
+        #endregion
+
         #region Systray menu
 
         private void DrawMenuItems()
