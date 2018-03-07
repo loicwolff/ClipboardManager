@@ -141,6 +141,8 @@ namespace ClipboardManager
         public void ToggleSavingEnabled()
         {
             SavingEnabled = !SavingEnabled;
+
+            AddClipItem(SafeClipboard.CurrentClipItem);
         }
 
         private void SendHistoryChangedEvent(ClipItem newClip, ClipItem previousClip = null)
