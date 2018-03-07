@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
@@ -12,6 +13,7 @@ using Newtonsoft.Json;
 
 namespace ClipboardManager
 {
+    [DebuggerDisplay("Text = {Text}")]
     public class ClipItem
     {
         public static readonly ClipItem Empty = new ClipItem { Text = String.Empty };
