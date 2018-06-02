@@ -11,7 +11,7 @@ namespace ClipboardManager
     public class NotificationCountToolStripItem : ToolStripControlHost
     {
         public event NotificationCountEventHandler ValueChanged;
-        
+
         public NotificationCountToolStripItem(int currentSelection)
             : base(new FlowLayoutPanel())
         {
@@ -21,17 +21,17 @@ namespace ClipboardManager
             mainPanel.AutoSize = false;
             mainPanel.Size = new System.Drawing.Size(100, 10);
             mainPanel.MinimumSize = mainPanel.Size;
-            
+
             var radioButtonPanel = new FlowLayoutPanel
             {
                 BackColor = Color.Transparent,
-                FlowDirection = FlowDirection.LeftToRight, 
-                AutoSize = false, 
-                Height = 22 ,
+                FlowDirection = FlowDirection.LeftToRight,
+                AutoSize = false,
+                Height = 22,
                 Margin = new Padding(0),
                 Padding = new Padding(0)
             };
-            
+
             for (int i = 1; i <= 5; i++)
             {
                 var radioButton = new RadioButton()
@@ -45,7 +45,7 @@ namespace ClipboardManager
                     Enabled = this.Enabled,
                 };
 
-                radioButton.CheckedChanged += radioButton_CheckedChanged;
+                radioButton.CheckedChanged += OnRadioButtonCheckedChanged;
 
                 radioButtonPanel.Controls.Add(radioButton);
             }
@@ -63,13 +63,11 @@ namespace ClipboardManager
             mainPanel.Controls.Add(radioButtonPanel);
         }
 
-        void radioButton_CheckedChanged(object sender, EventArgs e)
+        void OnRadioButtonCheckedChanged(object sender, EventArgs e)
         {
-            int? notificationCount = (sender as RadioButton).Tag as int?;
-
-            if (ValueChanged != null && notificationCount.HasValue)
+            if (sender is RadioButton radioButton && radioButton.Tag is int notificationCount)
             {
-                ValueChanged(this, new NotificationCountEventArgs(notificationCount.Value));
+                ValueChanged?.Invoke(this, new NotificationCountEventArgs(notificationCount));
             }
         }
     }

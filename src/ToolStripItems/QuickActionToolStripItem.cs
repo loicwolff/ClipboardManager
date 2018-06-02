@@ -23,7 +23,6 @@ namespace ClipboardManager
             mainPanel.BackColor = Color.Transparent;
             mainPanel.Padding = new Padding(0);
             mainPanel.Margin = new Padding(0);
-
             mainPanel.FlowDirection = FlowDirection.TopDown;
 
             foreach (QuickAction action in clipboardRule.QuickActions.AsEnumerable().Reverse())
@@ -39,7 +38,6 @@ namespace ClipboardManager
                     Padding = new Padding(0),
                 };
 
-                // Open button
                 var openButton = new Button()
                 {
                     Text = action.OpenLabel,
@@ -47,39 +45,33 @@ namespace ClipboardManager
                     Enabled = action.IsEnabled,
                     Padding = new Padding(0),
                     Margin = new Padding(0),
+                    Width = buttonWidth + 40,
                 };
 
-                openButton.Width = buttonWidth + 40;
                 openButton.MinimumSize = openButton.Size;
 
                 openButton.Click += (object sender, EventArgs e) =>
                 {
-                    if (ItemClicked != null)
-                    {
-                        ItemClicked(this, e);
-                    }
+                    ItemClicked?.Invoke(this, e);
 
                     action.Start(clipboardRule.Values);
                 };
 
                 buttonPanel.Controls.Add(openButton);
-                
+
                 if (action.CanCopy)
                 {
                     // Copy button
                     var copyButton = new Button
-                    { 
-                        Text = "Copy Link" ,
+                    {
+                        Text = "Copy Link",
                         Padding = new Padding(0),
                         Margin = new Padding(0),
                     };
 
                     copyButton.Click += (object sender, EventArgs e) =>
                     {
-                        if (CopyItemClicked != null)
-                        {
-                            CopyItemClicked(this, e);
-                        }
+                        CopyItemClicked?.Invoke(this, e);
 
                         action.Copy(clipboardRule.Values);
                     };

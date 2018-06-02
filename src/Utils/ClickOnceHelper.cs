@@ -16,8 +16,8 @@ namespace ClipboardManager
                 if (!File.Exists(startupPath))
                 {
                     string allProgramsPath = Environment.GetFolderPath(Environment.SpecialFolder.Programs);
-                    string shortcutPath = Path.Combine(allProgramsPath, publisherName);
-                    shortcutPath = Path.Combine(shortcutPath, productName) + ".appref-ms";
+                    
+                    string shortcutPath = Path.Combine(allProgramsPath, publisherName, productName) + ".appref-ms";
                     if (File.Exists(shortcutPath))
                     {
                         File.Copy(shortcutPath, startupPath);

@@ -17,19 +17,14 @@ namespace ClipboardManager
         public ClipItem ClipItem { get; set; }
     }
 
-    public class ClipboardHistory : IEnumerable<ClipItem>
+    public class ClipboardHistoryCollection : IEnumerable<ClipItem>
     {
         public event EventHandler<NewClipItemEventEventArgs> OnHistoryChanged;
 
         private const string JsonClipsFile = "clips.json";
         
         private const int MaxClipCount = 30;
-
-        /// <summary>
-        /// Dossier de l'application dans ApplicationData
-        /// </summary>
-        private string LocalDataFolder => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Clipboard Manager");
-
+        
         /// <summary>
         /// Indique si la sauvegarde est activée
         /// </summary>
@@ -38,22 +33,11 @@ namespace ClipboardManager
         /// <summary>
         /// Fichier JSON dans le dossier LocalData
         /// </summary>
-        private string LocalDataJsonClipsFile
-        {
-            get
-            {
-                if (!Directory.Exists(LocalDataFolder))
-                {
-                    Directory.CreateDirectory(LocalDataFolder);
-                }
-
-                return Path.Combine(LocalDataFolder, "clips.json");
-            }
-        }
+        private readonly string LocalDataJsonClipsFile = Path.Combine(TaskbarApplication.LocalDataFolder, JsonClipsFile);
 
         private List<ClipItem> Clips { get; set; }
 
-        public ClipboardHistory()
+        public ClipboardHistoryCollection()
         {
             this.SavingEnabled = true;
 
@@ -156,13 +140,10 @@ namespace ClipboardManager
                 Save();
             }
         }
-        
-        private List<ClipItem> LoadFromLocalDataJson()
-        {
-            return LoadFromJsonCore(LocalDataJsonClipsFile);
-        }
 
-        private List<ClipItem> LoadFromJsonCore(string jsonFilePath)
+        private List<ClipItem> LoadFromLocalDataJson() => LoadFromJsonCore(LocalDataJsonClipsFile);
+
+        private static List<ClipItem> LoadFromJsonCore(string jsonFilePath)
         {
             List<ClipItem> items = new List<ClipItem>();
 

@@ -16,8 +16,7 @@ namespace ClipboardManager
             {
                 foreach (ClipboardRule rule in ClipboardRules)
                 {
-                    string[] values;
-                    if (rule.IsMatch(text, out values))
+                    if (rule.IsMatch(text, out string[] values))
                     {
                         yield return new ClipboardRule
                         {
@@ -62,9 +61,7 @@ namespace ClipboardManager
             QuickActions = new List<QuickAction>();
             Label = "{0}";
         }
-
-        public string Type { get; set; }
-
+        
         public string Label { get; set; }
 
         public string[] Values { get; set; }
@@ -84,15 +81,15 @@ namespace ClipboardManager
         public virtual bool IsMatch(string input, out string[] output)
         {
             Match match = RuleRegex.Match(input);
-
-            output = null;
-
+            
             if (match.Success)
             {
                 output = match.Groups.OfType<Group>().Select(g => g.Value).ToArray();
 
                 return true;
             }
+
+            output = null;
 
             return false;
         }

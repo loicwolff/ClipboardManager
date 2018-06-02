@@ -17,6 +17,24 @@ namespace ClipboardManager
 
     public class TaskbarApplication : ApplicationContext
     {
+        /// <summary>
+        /// Create if necessary and return the local application data folder
+        /// </summary>
+        public static string LocalDataFolder
+        {
+            get
+            {
+                string folder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Clipboard Manager");
+
+                if(!Directory.Exists(folder))
+                {
+                    Directory.CreateDirectory(folder);
+                }
+
+                return folder;
+            }
+        }
+        
         #region Variables
 
         public event EventHandler CloseNotifications;
@@ -29,11 +47,9 @@ namespace ClipboardManager
 
         private Lazy<Configuration> configuration = new Lazy<Configuration>(() => Configuration.Load());
 
-        public List<ClipboardRule> ClipboardRules = new List<ClipboardRule>();
-
-        private Timer timer;
-
-        KeyboardHook keyboardHook;
+        private List<ClipboardRule> ClipboardRules = new List<ClipboardRule>();
+        
+        private KeyboardHook keyboardHook;
 
         private NotifyIcon trayIcon;
 
@@ -43,8 +59,8 @@ namespace ClipboardManager
 
         private static readonly Object clipsLock = new Object();
 
-        private ClipboardHistory clipboardHistory = new ClipboardHistory();
-        private ClipboardHistory ClipboardHistory
+        private readonly ClipboardHistoryCollection clipboardHistory = new ClipboardHistoryCollection();
+        private ClipboardHistoryCollection ClipboardHistory
         {
             get
             {
@@ -54,10 +70,10 @@ namespace ClipboardManager
                 }
             }
         }
-
-        public bool UpdateAvailable { get; set; }
-
+        
         private Configuration Configuration => configuration.Value;
+
+        public Icon DisabledIcon => disabledIcon;
 
         #endregion
 
@@ -65,8 +81,6 @@ namespace ClipboardManager
 
         public TaskbarApplication()
         {
-            UpdateAvailable = false;
-
             trayIcon = new NotifyIcon()
             {
                 Icon = mainIcon,
@@ -85,23 +99,12 @@ namespace ClipboardManager
                     mi.Invoke(trayIcon, null);
                 }
             };
-
-            timer = new Timer
-            {
-                Interval = 400,
-            };
-            timer.Tick += (object sender, EventArgs e) =>
-            {
-                trayIcon.Icon = mainIcon;
-
-                timer.Stop();
-            };
-
+            
             keyboardHook = new KeyboardHook();
 
             try
             {
-                keyboardHook.RegisterHotKey(ModifierKeys.Win | ModifierKeys.Shift, Keys.C);
+                keyboardHook.RegisterHotkey(ModifierKeys.Win | ModifierKeys.Shift, Keys.C);
             }
             catch (Exception)
             {
@@ -110,7 +113,7 @@ namespace ClipboardManager
 
             try
             {
-                keyboardHook.RegisterHotKey(ModifierKeys.Win | ModifierKeys.Shift, Keys.W);
+                keyboardHook.RegisterHotkey(ModifierKeys.Win | ModifierKeys.Shift, Keys.W);
             }
             catch (Exception)
             {
@@ -119,7 +122,7 @@ namespace ClipboardManager
 
             try
             {
-                keyboardHook.RegisterHotKey(ModifierKeys.Win | ModifierKeys.Shift, Keys.X);
+                keyboardHook.RegisterHotkey(ModifierKeys.Win | ModifierKeys.Shift, Keys.X);
             }
             catch (Exception)
             {
@@ -128,7 +131,7 @@ namespace ClipboardManager
 
             try
             {
-                keyboardHook.RegisterHotKey(ModifierKeys.Win | ModifierKeys.Shift, Keys.D);
+                keyboardHook.RegisterHotkey(ModifierKeys.Win | ModifierKeys.Shift, Keys.D);
             }
             catch (Exception)
             {
@@ -148,19 +151,17 @@ namespace ClipboardManager
 
         #region Systray menu
 
-        private void DrawMenuItems()
+        private void AddClipboardHistory()
         {
-            trayIcon.ContextMenuStrip.Items.Clear();
-
             foreach (ClipItem clip in ClipboardHistory)
             {
-                Tuple<string, string> tuple = Ellipsis(clip.Text);
+                var (label, length) = Ellipsis(clip.Text);
 
                 bool isInClipboard = clip == ClipboardHistory.CurrentClip;
 
-                var trayIconMenuItem = new ToolStripMenuItem(tuple.Item1)
+                var trayIconMenuItem = new ToolStripMenuItem(label)
                 {
-                    ShortcutKeyDisplayString = tuple.Item2,
+                    ShortcutKeyDisplayString = length,
                     Enabled = ClipboardHistory.SavingEnabled,
                     Font = new Font(SystemFonts.MenuFont, isInClipboard ? FontStyle.Bold : FontStyle.Regular),
                 };
@@ -178,7 +179,10 @@ namespace ClipboardManager
 
                 trayIcon.ContextMenuStrip.Items.Add(trayIconMenuItem);
             }
+        }
 
+        private void AddClipboardRules()
+        {
             if (ClipboardRules != null && ClipboardRules.Any())
             {
                 var actions = ClipboardRules.SelectMany(r => r.QuickActions);
@@ -187,7 +191,7 @@ namespace ClipboardManager
 
                 trayIcon.ContextMenuStrip.Items.Add(new ToolStripSeparator());
                 trayIcon.ContextMenuStrip.Items.Add(new LabelToolStripItem("Quick Actions"));
-                
+
                 foreach (ClipboardRule rule in ClipboardRules)
                 {
                     var quickActionMenuItem = new QuickActionToolStripItem(rule, width);
@@ -203,6 +207,15 @@ namespace ClipboardManager
                     trayIcon.ContextMenuStrip.Items.Add(quickActionMenuItem);
                 }
             }
+        }
+
+        private void DrawMenuItems()
+        {
+            trayIcon.ContextMenuStrip.Items.Clear();
+
+            this.AddClipboardHistory();
+
+            this.AddClipboardRules();
 
             if (ClipboardHistory.Any())
             {
@@ -265,26 +278,24 @@ namespace ClipboardManager
             return menuItem;
         }
 
-        void Exit(object sender, EventArgs e)
+        private void Exit(object sender, EventArgs e)
         {
-            timer.Stop();
-
             // Hide tray icon, otherwise it will remain shown until user mouses over it
             trayIcon.Visible = false;
 
             Application.Exit();
         }
 
-        void ToggleSaving(object sender, EventArgs e)
+        private void ToggleSaving(object sender, EventArgs e)
         {
             ClipboardHistory.ToggleSavingEnabled();
 
-            this.trayIcon.Icon = ClipboardHistory.SavingEnabled ? this.mainIcon : this.disabledIcon;
+            this.trayIcon.Icon = ClipboardHistory.SavingEnabled ? this.mainIcon : this.DisabledIcon;
 
             DrawMenuItems();
         }
 
-        void ToggleHUD(object sender, EventArgs e)
+        private void ToggleHUD(object sender, EventArgs e)
         {
             Configuration.ShowHUD = !Configuration.ShowHUD;
             Configuration.Save();
@@ -292,7 +303,7 @@ namespace ClipboardManager
             DrawMenuItems();
         }
 
-        void ToggleLimitNotification(object sender, EventArgs e)
+        private void ToggleLimitNotification(object sender, EventArgs e)
         {
             Configuration.LimitNotificationCount = !Configuration.LimitNotificationCount;
             Configuration.Save();
@@ -300,7 +311,7 @@ namespace ClipboardManager
             DrawMenuItems();
         }
 
-        void ToggleAlwaysShowNotifications(object sender, EventArgs e)
+        private void ToggleAlwaysShowNotifications(object sender, EventArgs e)
         {
             Configuration.AlwaysShowNotifications = !Configuration.AlwaysShowNotifications;
             Configuration.Save();
@@ -393,10 +404,7 @@ namespace ClipboardManager
 
         private void SendCloseNotificationsEvent()
         {
-            if (CloseNotifications != null)
-            {
-                CloseNotifications(this, EventArgs.Empty);
-            }
+            CloseNotifications?.Invoke(this, EventArgs.Empty);
         }
 
         private QuickAction GetFirstQuickAction(bool copyOnly, out string[] urlValues)
@@ -406,13 +414,11 @@ namespace ClipboardManager
             {
                 urlValues = rule.Values;
 
-                var actions = from action in rule.QuickActions
-                              where action.IsEnabled
-                              select action;
+                var actions = rule.QuickActions.Where(a => a.IsEnabled);
 
                 if (copyOnly)
                 {
-                    actions = actions.Where(a => a.CanCopy).AsQueryable();
+                    actions = actions.Where(a => a.CanCopy);
                 }
 
                 var firstAction = actions.FirstOrDefault();
@@ -426,8 +432,7 @@ namespace ClipboardManager
 
         private void CopyFirstLink()
         {
-            string[] urlValues;
-            var action = GetFirstQuickAction(true, urlValues: out urlValues);
+            var action = GetFirstQuickAction(true, out string[] urlValues);
 
             if (action != null)
             {
@@ -450,13 +455,9 @@ namespace ClipboardManager
 
         private void OpenFirstAction()
         {
-            string[] urlValues;
-            var action = GetFirstQuickAction(true, urlValues: out urlValues);
+            var action = GetFirstQuickAction(true, out string[] urlValues);
 
-            if (action != null)
-            {
-                action.Start(urlValues);
-            }
+            action?.Start(urlValues);
         }
 
         #endregion
@@ -496,22 +497,23 @@ namespace ClipboardManager
             }
         }
 
-        private Tuple<string, string> Ellipsis(string label)
+        private static (string label, string length) Ellipsis(string label)
         {
             if (String.IsNullOrWhiteSpace(label))
             {
-                return new Tuple<string, string>(label, String.Empty);
+                return (label, String.Empty);
             }
 
             label = Regex.Replace(label, @"([\r\n]+|\t+|\s+)", " ").Replace("&", "&&").Trim();
 
             if (label.Length > EllipsisLength + 1)
             {
-                return new Tuple<string, string>(String.Concat(label.Substring(0, EllipsisLength).TrimEnd(), "…").PadRight(EllipsisLength + 5), String.Format("[+{0:N0}c]", label.Length - EllipsisLength));
+                return (label : String.Concat(label.Substring(0, EllipsisLength).TrimEnd(), "…").PadRight(EllipsisLength + 5),
+                        length : String.Format("[+{0:N0}c]", label.Length - EllipsisLength));
             }
             else
             {
-                return new Tuple<string, string>(label, String.Empty);
+                return (label, String.Empty);
             }
         }
     }

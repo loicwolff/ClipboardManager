@@ -10,11 +10,9 @@ namespace ClipboardManager
 {
     public class Configuration
     {
-        public static string ConfigurationFile = "configuration.xml";
+        public const string ConfigurationFile = "configuration.xml";
 
-        private static string LocalDataFolder => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Clipboard Manager");
-
-        private static string LocalDataConfigurationFile => Path.Combine(LocalDataFolder, "configuration.xml");
+        private static readonly string LocalDataConfigurationFile = Path.Combine(TaskbarApplication.LocalDataFolder, ConfigurationFile);
 
         private const bool DefaultShowHUD = true;
         private const int DefaultNotificationCount = 5;
@@ -24,21 +22,25 @@ namespace ClipboardManager
         /// <summary>
         /// Indique s'il faut limiter le nombre de notification à afficher
         /// </summary>
+        [DefaultValue(DefaultLimitNotificationCount)]
         public bool LimitNotificationCount { get; set; }
 
         /// <summary>
         /// Indique s'il faut afficher les notifications
         /// </summary>
+        [DefaultValue(DefaultShowHUD)]
         public bool ShowHUD { get; set; }
 
         /// <summary>
         /// Indique s'il faut toujours afficher les notifications (même quand le clipboard est identique)
         /// </summary>
+        [DefaultValue(DefaultAlwaysShowNotifications)]
         public bool AlwaysShowNotifications { get; set; }
 
         /// <summary>
         /// Nombre max de notification
         /// </summary>
+        [DefaultValue(DefaultNotificationCount)]
         public int MaxNotificationCount { get; set; }
 
         public Configuration()
@@ -72,15 +74,9 @@ namespace ClipboardManager
             }
         }
 
-        private static Configuration LoadFromConfigurationFile()
-        {
-            return LoadFromConfigurationCore(LocalDataConfigurationFile);
-        }
+        private static Configuration LoadFromConfigurationFile() => LoadFromConfigurationCore(LocalDataConfigurationFile);
 
-        private static Configuration LoadFromLegacyConfiguration()
-        {
-            return LoadFromConfigurationCore(ConfigurationFile);
-        }
+        private static Configuration LoadFromLegacyConfiguration() => LoadFromConfigurationCore(ConfigurationFile);
 
         private static Configuration LoadFromConfigurationCore(string configurationFilePath)
         {
@@ -94,11 +90,6 @@ namespace ClipboardManager
 
         public void Save()
         {
-            if (!Directory.Exists(LocalDataFolder))
-            {
-                Directory.CreateDirectory(LocalDataFolder);
-            }
-
             XmlSerializerNamespaces ns = new XmlSerializerNamespaces();
             ns.Add("", "");
 

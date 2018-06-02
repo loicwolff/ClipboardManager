@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("Clipboard Manager")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("Clipboard manager with actions!")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("Clipboard Manager")]

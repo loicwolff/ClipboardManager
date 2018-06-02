@@ -12,19 +12,14 @@ namespace ClipboardManager
     /// </summary>
     public sealed class KeyboardHook : IDisposable
     {
-        // Registers a hot key with Windows.
-        [DllImport("user32.dll")]
-        private static extern bool RegisterHotKey(IntPtr hWnd, int id, uint fsModifiers, uint vk);
-        // Unregisters the hot key with Windows.
-        [DllImport("user32.dll")]
-        private static extern bool UnregisterHotKey(IntPtr hWnd, int id);
+
 
         /// <summary>
         /// Represents the window that is used internally to get the messages.
         /// </summary>
-        public class Window : NativeWindow, IDisposable
+        public sealed class Window : NativeWindow, IDisposable
         {
-            private static int WM_HOTKEY = 0x0312;
+            private static readonly int WM_HOTKEY = 0x0312;
 
             public Window()
             {
@@ -48,8 +43,7 @@ namespace ClipboardManager
                     ModifierKeys modifier = (ModifierKeys)((int)m.LParam & 0xFFFF);
 
                     // invoke the event to notify the parent.
-                    if (KeyPressed != null)
-                        KeyPressed(this, new KeyPressedEventArgs(modifier, key));
+                    KeyPressed?.Invoke(this, new KeyPressedEventArgs(modifier, key));
                 }
             }
 
@@ -68,28 +62,18 @@ namespace ClipboardManager
         internal Window _window = new Window();
         private int _currentId;
 
-        public KeyboardHook()
-        {
-            // register the event of the inner native window.
-            _window.KeyPressed += delegate(object sender, KeyPressedEventArgs args)
-            {
-                if (KeyPressed != null)
-                    KeyPressed(this, args);
-            };
-        }
+        // register the event of the inner native window.
+        public KeyboardHook() => _window.KeyPressed += (object sender, KeyPressedEventArgs args) => KeyPressed?.Invoke(this, args);
 
         /// <summary>
         /// Registers a hot key in the system.
         /// </summary>
         /// <param name="modifier">The modifiers that are associated with the hot key.</param>
         /// <param name="key">The key itself that is associated with the hot key.</param>
-        public void RegisterHotKey(ModifierKeys modifier, Keys key)
+        public void RegisterHotkey(ModifierKeys modifier, Keys key)
         {
-            // increment the counter.
-            _currentId = _currentId + 1;
-
             // register the hot key.
-            if (!RegisterHotKey(_window.Handle, _currentId, (uint)modifier, (uint)key))
+            if (!NativeMethods.RegisterHotKey(_window.Handle, ++_currentId, (uint)modifier, (uint)key))
                 throw new InvalidOperationException("Couldn’t register the hot key.");
         }
 
@@ -105,7 +89,7 @@ namespace ClipboardManager
             // unregister all the registered hot keys.
             for (int i = _currentId; i > 0; i--)
             {
-                UnregisterHotKey(_window.Handle, i);
+                NativeMethods.UnregisterHotKey(_window.Handle, i);
             }
 
             // dispose the inner native window.
@@ -120,24 +104,15 @@ namespace ClipboardManager
     /// </summary>
     public class KeyPressedEventArgs : EventArgs
     {
-        private ModifierKeys _modifier;
-        private Keys _key;
-
         internal KeyPressedEventArgs(ModifierKeys modifier, Keys key)
         {
-            _modifier = modifier;
-            _key = key;
+            Modifier = modifier;
+            Key = key;
         }
 
-        public ModifierKeys Modifier
-        {
-            get { return _modifier; }
-        }
+        public ModifierKeys Modifier { get; }
 
-        public Keys Key
-        {
-            get { return _key; }
-        }
+        public Keys Key { get; }
     }
 
     /// <summary>

@@ -17,25 +17,12 @@ namespace ClipboardManager
         public event MouseEventHandler OpenClick;
         public event MouseEventHandler CopyLinkClick;
         public event MouseEventHandler RightClick;
-
+        
         private const int SW_SHOWNOACTIVATE = 4;
         private const int HWND_TOPMOST = -1;
         private const uint SWP_NOACTIVATE = 0x0010;
 
-        [DllImport("user32.dll", EntryPoint = "SetWindowPos")]
-        static extern bool SetWindowPos(
-             int hWnd,             // Window handle
-             int hWndInsertAfter,  // Placement-order handle
-             int X,                // Horizontal position
-             int Y,                // Vertical position
-             int cx,               // Width
-             int cy,               // Height
-             uint uFlags);         // Window positioning flags
-
-        [DllImport("user32.dll")]
-        static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
-
-        private Timer fadeOutTimer;
+        private Timer fadeoutTimer;
 
         private bool fadingIn = false;
 
@@ -57,11 +44,11 @@ namespace ClipboardManager
 
             App = app;
 
-            fadeOutTimer = new Timer
+            fadeoutTimer = new Timer
             {
                 Interval = 4000
             };
-            fadeOutTimer.Tick += OnTimerTick;
+            fadeoutTimer.Tick += OnTimerTick;
 
             NotificationClosing = false;
 
@@ -123,7 +110,7 @@ namespace ClipboardManager
             }
         }
 
-        private void OnParentCloseNotifications(object sender, EventArgs e) => FadeOut();
+        private void OnParentCloseNotifications(object sender, EventArgs e) => Fadeout();
 
         public int StartPosY
         {
@@ -131,10 +118,10 @@ namespace ClipboardManager
             set;
         }
 
-        void OnTimerTick(object sender, EventArgs e)
+        private void OnTimerTick(object sender, EventArgs e)
         {
-            fadeOutTimer.Stop();
-            FadeOut();
+            fadeoutTimer.Stop();
+            Fadeout();
         }
 
         public async void FadeIn()
@@ -154,11 +141,11 @@ namespace ClipboardManager
 
                 fadingIn = false;
 
-                fadeOutTimer.Start();
+                fadeoutTimer.Start();
             }
         }
 
-        public async void FadeOut()
+        public async void Fadeout()
         {
             NotificationClosing = true;
 
@@ -180,8 +167,8 @@ namespace ClipboardManager
 
         public void ShowInactiveTopmost()
         {
-            ShowWindow(Handle, SW_SHOWNOACTIVATE);
-            SetWindowPos(Handle.ToInt32(), HWND_TOPMOST, Screen.PrimaryScreen.WorkingArea.Width - Width - 10, StartPosY, this.Width, this.Height, SWP_NOACTIVATE);
+            NativeMethods.ShowWindow(Handle, SW_SHOWNOACTIVATE);
+            NativeMethods.SetWindowPos(Handle.ToInt32(), HWND_TOPMOST, Screen.PrimaryScreen.WorkingArea.Width - Width - 10, StartPosY, this.Width, this.Height, SWP_NOACTIVATE);
         }
 
         private void OnCopyLinkClick(object sender, MouseEventArgs e)
@@ -191,14 +178,14 @@ namespace ClipboardManager
                 CopyLinkClick(sender, e);
             }
 
-            FadeOut();
+            Fadeout();
         }
 
         private void OnMouseEnter(object sender, EventArgs e)
         {
             if (!NotificationClosing && !fadingIn)
             {
-                fadeOutTimer.Stop();
+                fadeoutTimer.Stop();
 
                 Opacity = 1;
             }
@@ -208,7 +195,7 @@ namespace ClipboardManager
         {
             if (!NotificationClosing && !fadingIn)
             {
-                fadeOutTimer.Start();
+                fadeoutTimer.Start();
             }
         }
 
@@ -229,7 +216,7 @@ namespace ClipboardManager
                 CopyLinkClick(sender, e);
             }
 
-            FadeOut();
+            Fadeout();
         }
 
         private void OpenLinkLabel_MouseUp(object sender, MouseEventArgs e)
@@ -238,17 +225,14 @@ namespace ClipboardManager
             {
                 App.CloseNotifications -= OnParentCloseNotifications;
 
-                if (RightClick != null)
-                {
-                    RightClick(this, e);
-                }
+                RightClick?.Invoke(this, e);
             }
             else if (e.Button == MouseButtons.Left && OpenClick != null)
             {
                 OpenClick(sender, e);
             }
 
-            FadeOut();
+            Fadeout();
         }
     }
 }

@@ -23,16 +23,8 @@ namespace ClipboardManager
 
         [JsonIgnore]
         public bool IsEmpty => String.IsNullOrWhiteSpace(Text);
-
-        public override bool Equals(object obj)
-        {
-            if (!(obj is ClipItem))
-                return false;
-
-            ClipItem clipItem = (ClipItem)obj;
-
-            return clipItem.Text == this.Text;
-        }
+        
+        public override bool Equals(object obj) => obj is ClipItem clipItem && clipItem.Text == this.Text;
 
         public override int GetHashCode() => this.Text.GetHashCode();
 
