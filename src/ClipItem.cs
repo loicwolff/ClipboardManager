@@ -22,7 +22,7 @@ namespace ClipboardManager
         public string Text { get; set; }
 
         [JsonIgnore]
-        public bool IsEmpty { get { return String.IsNullOrWhiteSpace(Text); } }
+        public bool IsEmpty => String.IsNullOrWhiteSpace(Text);
 
         public override bool Equals(object obj)
         {
@@ -34,19 +34,10 @@ namespace ClipboardManager
             return clipItem.Text == this.Text;
         }
 
-        public override int GetHashCode()
-        {
-            return this.Text.GetHashCode();
-        }
+        public override int GetHashCode() => this.Text.GetHashCode();
 
-        public static bool operator ==(ClipItem c1, ClipItem c2)
-        {
-            return c1.Equals(c2);
-        }
+        public static bool operator ==(ClipItem c1, ClipItem c2) => c1.Equals(c2);
 
-        public static bool operator !=(ClipItem c1, ClipItem c2)
-        {
-            return !c1.Equals(c2);
-        }
+        public static bool operator !=(ClipItem c1, ClipItem c2) => !c1.Equals(c2);
     }
 }

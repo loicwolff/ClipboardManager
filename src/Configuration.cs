@@ -12,21 +12,9 @@ namespace ClipboardManager
     {
         public static string ConfigurationFile = "configuration.xml";
 
-        private static string LocalDataFolder
-        {
-            get
-            {
-                return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Clipboard Manager");
-            }
-        }
+        private static string LocalDataFolder => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Clipboard Manager");
 
-        private static string LocalDataConfigurationFile
-        {
-            get
-            {
-                return Path.Combine(LocalDataFolder, "configuration.xml");
-            }
-        }
+        private static string LocalDataConfigurationFile => Path.Combine(LocalDataFolder, "configuration.xml");
 
         private const bool DefaultShowHUD = true;
         private const int DefaultNotificationCount = 5;

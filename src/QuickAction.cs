@@ -17,43 +17,40 @@ namespace ClipboardManager
     public class QuickAction
     {
         /// <summary>
-        /// Nom l'action (non utilisé dans l'interface)
+        /// Action name
         /// </summary>
         public virtual string Name { get; set; }
 
         /// <summary>
-        /// Url à ouvrir
+        /// Uri to open
         /// </summary>
         public virtual string Url { get; set; }
 
         /// <summary>
-        /// Libellé affiché par les notifications et les boutons du menu
+        /// Label shown by notification and menu buttons
         /// </summary>
         public virtual string OpenLabel { get; set; }
 
         /// <summary>
-        /// Indique si on peut copier le lien
+        /// Indicate if the link can be copied
         /// </summary>
         public virtual bool CanCopy { get; set; }
 
         /// <summary>
-        /// Méthode retournant un complément ajouté à l'url
+        /// Optional method to complement the url
         /// </summary>
         public virtual Func<string> GetUrlComplement { get; set; }
 
         /// <summary>
-        /// Constructeur
+        /// Constructor
         /// </summary>
-        public QuickAction()
-        {
-            CanCopy = true;
-        }
+        public QuickAction() => CanCopy = true;
 
         /// <summary>
-        /// Méthode de construction de l'URL à ouvrir
+        /// Build the URL to open
         /// </summary>
-        /// <param name="urlValues">Les données extraites du presse-papier</param>
-        /// <returns>Renvoie l'URL formattée à ouvrir</returns>
+        /// <param name="urlValues">Values to insert in the urls</param>
+        /// <returns>Return the url formatted with the <paramref name="urlValues"/></returns>
         protected virtual string GetFormattedUrl(string[] urlValues)
         {
             string url = String.Format(Url, urlValues);
@@ -67,30 +64,21 @@ namespace ClipboardManager
         }
 
         /// <summary>
-        /// Méthode pour placer l'URL formattée dans le presse-papier
+        /// Method to copy the url in the clipboard
         /// </summary>
         /// <param name="urlValues">Les données extraites du presse-papier</param>
-        public virtual void Copy(string[] urlValues)
-        {
-            Clipboard.SetText(GetFormattedUrl(urlValues));
-        }
+        public virtual void Copy(string[] urlValues) => Clipboard.SetText(GetFormattedUrl(urlValues));
 
         /// <summary>
         /// Méthode pour ouvrir l'URL formattée
         /// </summary>
         /// <param name="urlValues">Les données extraites du presse-papier</param>
-        public virtual void Start(string[] urlValues)
-        {
-            Process.Start(GetFormattedUrl(urlValues));
-        }
+        public virtual void Start(string[] urlValues) => Process.Start(GetFormattedUrl(urlValues));
 
         /// <summary>
         /// Indique si l'action est activée
         /// </summary>
-        public virtual bool IsEnabled
-        {
-            get { return true; }
-        }
+        public virtual bool IsEnabled => true;
     }
     
     /// <summary>
@@ -98,10 +86,7 @@ namespace ClipboardManager
     /// </summary>
     public class AppQuickAction : QuickAction
     {
-        public AppQuickAction()
-        {
-            CanCopy = false;
-        }
+        public AppQuickAction() => CanCopy = false;
 
         /// <summary>
         /// Indique s'il faut dire à l'application recevant d'utiliser le presse-papier
@@ -116,13 +101,7 @@ namespace ClipboardManager
         /// <summary>
         /// Vérifie si l'application est installée
         /// </summary>
-        public override bool IsEnabled
-        {
-            get
-            {
-                return File.Exists(Url);
-            }
-        }
+        public override bool IsEnabled => File.Exists(Url);
 
         /// <summary>
         /// Ouvre l'application avec les paramètres nécessaires
@@ -155,13 +134,7 @@ namespace ClipboardManager
     /// </summary>
     public class ExtractQuickAction : QuickAction
     {
-        public override bool CanCopy
-        {
-            get
-            {
-                return false;
-            }
-        }
+        public override bool CanCopy => false;
 
         public override void Start(string[] urlValues)
         {

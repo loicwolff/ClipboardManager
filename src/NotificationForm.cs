@@ -57,13 +57,15 @@ namespace ClipboardManager
 
             App = app;
 
-            fadeOutTimer = new Timer();
-            fadeOutTimer.Interval = 4000;
-            fadeOutTimer.Tick += timer_Tick;
+            fadeOutTimer = new Timer
+            {
+                Interval = 4000
+            };
+            fadeOutTimer.Tick += OnTimerTick;
 
             NotificationClosing = false;
 
-            App.CloseNotifications += parent_CloseNotifications;
+            App.CloseNotifications += OnParentCloseNotifications;
         }
 
         /// <summary>
@@ -121,10 +123,7 @@ namespace ClipboardManager
             }
         }
 
-        void parent_CloseNotifications(object sender, EventArgs e)
-        {
-            FadeOut();
-        }
+        private void OnParentCloseNotifications(object sender, EventArgs e) => FadeOut();
 
         public int StartPosY
         {
@@ -132,7 +131,7 @@ namespace ClipboardManager
             set;
         }
 
-        void timer_Tick(object sender, EventArgs e)
+        void OnTimerTick(object sender, EventArgs e)
         {
             fadeOutTimer.Stop();
             FadeOut();
@@ -237,7 +236,7 @@ namespace ClipboardManager
         {
             if (e.Button == MouseButtons.Right)
             {
-                App.CloseNotifications -= parent_CloseNotifications;
+                App.CloseNotifications -= OnParentCloseNotifications;
 
                 if (RightClick != null)
                 {

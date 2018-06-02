@@ -57,10 +57,7 @@ namespace ClipboardManager
 
         public bool UpdateAvailable { get; set; }
 
-        private Configuration Configuration
-        {
-            get { return configuration.Value; }
-        }
+        private Configuration Configuration => configuration.Value;
 
         #endregion
 
@@ -164,7 +161,6 @@ namespace ClipboardManager
                 var trayIconMenuItem = new ToolStripMenuItem(tuple.Item1)
                 {
                     ShortcutKeyDisplayString = tuple.Item2,
-                    Checked = isInClipboard,
                     Enabled = ClipboardHistory.SavingEnabled,
                     Font = new Font(SystemFonts.MenuFont, isInClipboard ? FontStyle.Bold : FontStyle.Regular),
                 };

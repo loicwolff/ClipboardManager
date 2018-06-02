@@ -32,7 +32,29 @@ namespace ClipboardManager
 
         internal static List<ClipboardRule> ClipboardRules = new List<ClipboardRule>()
         {
-            
+            new ClipboardRule
+            {
+                Label = "Redmine issue",
+                RegexPattern = @"
+                    ^
+                    \s*
+                    (?:refs)?
+                    \s*
+                    \#([0-9]+)
+                    \s*
+                    $
+                    ",
+                QuickActions = new List<QuickAction>()
+                {
+                    new QuickAction
+                    {
+                        CanCopy = true,
+                        Name = "Redmine",
+                        OpenLabel = "Open Redmine issue",
+                        Url = "https://redmine.neovici.se/issues/{1}",
+                    }
+                }
+            },
         };
 
         public ClipboardRule()

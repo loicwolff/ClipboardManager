@@ -63,10 +63,7 @@ namespace ClipboardManager
             }
         }
 
-        public static void Clear()
-        {
-            Clipboard.Clear();
-        }
+        public static void Clear() => Clipboard.Clear();
 
         public static bool ContainsText()
         {

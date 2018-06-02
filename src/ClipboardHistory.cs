@@ -24,17 +24,11 @@ namespace ClipboardManager
         private const string JsonClipsFile = "clips.json";
         
         private const int MaxClipCount = 30;
-        
+
         /// <summary>
         /// Dossier de l'application dans ApplicationData
         /// </summary>
-        private string LocalDataFolder
-        {
-            get
-            {
-                return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Clipboard Manager");
-            }
-        }
+        private string LocalDataFolder => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Clipboard Manager");
 
         /// <summary>
         /// Indique si la sauvegarde est activée
@@ -201,14 +195,8 @@ namespace ClipboardManager
             }
         }
 
-        public IEnumerator<ClipItem> GetEnumerator()
-        {
-            return this.Clips.GetEnumerator();
-        }
+        public IEnumerator<ClipItem> GetEnumerator() => this.Clips.GetEnumerator();
 
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return this.Clips.GetEnumerator();
-        }
+        IEnumerator IEnumerable.GetEnumerator() => this.Clips.GetEnumerator();
     }
 }
