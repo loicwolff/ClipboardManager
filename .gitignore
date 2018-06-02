@@ -5,3 +5,4 @@ src/obj
 src/packages
 src/Clipboard Manager.csproj.user
 src/.vs/*
+/src/publish
