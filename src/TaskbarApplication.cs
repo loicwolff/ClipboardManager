@@ -179,6 +179,14 @@ namespace ClipboardManager
 
                 trayIcon.ContextMenuStrip.Items.Add(trayIconMenuItem);
             }
+
+            if (this.ClipboardHistory.CurrentClip.IsEmpty)
+            {
+                trayIcon.ContextMenuStrip.Items.Add(new ToolStripMenuItem("Clipboard is empty")
+                {
+                    Enabled = false,
+                });
+            }
         }
 
         private void AddClipboardRules()
