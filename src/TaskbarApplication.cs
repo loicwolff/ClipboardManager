@@ -96,7 +96,7 @@ namespace ClipboardManager
                 if (mouseEvent.Button == MouseButtons.Left)
                 {
                     MethodInfo mi = typeof(NotifyIcon).GetMethod("ShowContextMenu", BindingFlags.Instance | BindingFlags.NonPublic);
-                    mi.Invoke(trayIcon, null);
+                    mi?.Invoke(trayIcon, null);
                 }
             };
             
