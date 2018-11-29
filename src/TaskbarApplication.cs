@@ -266,12 +266,6 @@ namespace ClipboardManager
                     };
                     menuItem.DropDownItems.Add(notificationCountItem);
                 }
-
-                menuItem.DropDownItems.Add(new ToolStripMenuItem("Always Show Notifications", null, ToggleAlwaysShowNotifications)
-                {
-                    Enabled = Configuration.ShowHUD,
-                    Checked = Configuration.AlwaysShowNotifications,
-                });
             }
 
             menuItem.DropDownItems.Add(new ToolStripSeparator());
@@ -477,12 +471,9 @@ namespace ClipboardManager
         {
             ClipboardRules = ClipboardRule.GetMatchingRules(e.ClipItem.Text).ToList();
 
-            if (e.ClipItem != ClipItem.Empty)
+            if (e.ClipItem != ClipItem.Empty && e.ClipItem != e.PreviousClipItem)
             {
-                if (Configuration.AlwaysShowNotifications || e.ClipItem != e.PreviousClipItem)
-                {
-                    ShowNotifications();
-                }
+                ShowNotifications();
             }
 
             DrawMenuItems();

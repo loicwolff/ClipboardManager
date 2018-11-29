@@ -16,7 +16,6 @@ namespace ClipboardManager
 
         private const bool DefaultShowHUD = true;
         private const int DefaultNotificationCount = 5;
-        private const bool DefaultAlwaysShowNotifications = true;
         private const bool DefaultLimitNotificationCount = false;
 
         /// <summary>
@@ -32,12 +31,6 @@ namespace ClipboardManager
         public bool ShowHUD { get; set; }
 
         /// <summary>
-        /// Indique s'il faut toujours afficher les notifications (même quand le clipboard est identique)
-        /// </summary>
-        [DefaultValue(DefaultAlwaysShowNotifications)]
-        public bool AlwaysShowNotifications { get; set; }
-
-        /// <summary>
         /// Nombre max de notification
         /// </summary>
         [DefaultValue(DefaultNotificationCount)]
@@ -47,7 +40,6 @@ namespace ClipboardManager
         {
             ShowHUD = DefaultShowHUD;
             MaxNotificationCount = DefaultNotificationCount;
-            AlwaysShowNotifications = DefaultAlwaysShowNotifications;
             LimitNotificationCount = DefaultLimitNotificationCount;
         }
 
