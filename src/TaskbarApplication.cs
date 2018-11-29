@@ -288,10 +288,13 @@ namespace ClipboardManager
 
         private void Exit(object sender, EventArgs e)
         {
-            // Hide tray icon, otherwise it will remain shown until user mouses over it
-            trayIcon.Visible = false;
+            if (MessageBox.Show("Quit Clipboard Manager?\nYour clipboard will no longer be saved.", "Clipboard Manager", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2) == DialogResult.Yes)
+            {
+                // Hide tray icon, otherwise it will remain shown until user mouses over it
+                trayIcon.Visible = false;
 
-            Application.Exit();
+                Application.Exit();
+            }
         }
 
         private void ToggleSaving(object sender, EventArgs e)
