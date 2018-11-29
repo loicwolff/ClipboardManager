@@ -26,7 +26,7 @@ namespace ClipboardManager
             {
                 string folder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Clipboard Manager");
 
-                if(!Directory.Exists(folder))
+                if (!Directory.Exists(folder))
                 {
                     Directory.CreateDirectory(folder);
                 }
@@ -34,21 +34,21 @@ namespace ClipboardManager
                 return folder;
             }
         }
-        
+
         #region Variables
 
         public event EventHandler CloseNotifications;
 
         private const int EllipsisLength = 30;
         private const int MaxClipCount = 30;
-        
+
         private readonly Icon mainIcon = Icon.FromHandle(Resources.clip.GetHicon());
         private readonly Icon disabledIcon = Icon.FromHandle(Resources.clip_disabled.GetHicon());
 
         private Lazy<Configuration> configuration = new Lazy<Configuration>(() => Configuration.Load());
 
-        private List<ClipboardRule> ClipboardRules = new List<ClipboardRule>();
-        
+        private IReadOnlyList<ClipboardRule> ClipboardRules = new List<ClipboardRule>();
+
         private KeyboardHook keyboardHook;
 
         private NotifyIcon trayIcon;
@@ -70,7 +70,7 @@ namespace ClipboardManager
                 }
             }
         }
-        
+
         private Configuration Configuration => configuration.Value;
 
         public Icon DisabledIcon => disabledIcon;
@@ -99,7 +99,7 @@ namespace ClipboardManager
                     mi?.Invoke(trayIcon, null);
                 }
             };
-            
+
             keyboardHook = new KeyboardHook();
 
             try
@@ -146,7 +146,7 @@ namespace ClipboardManager
 
             DrawMenuItems();
         }
-        
+
         #endregion
 
         #region Systray menu
@@ -221,34 +221,32 @@ namespace ClipboardManager
         {
             trayIcon.ContextMenuStrip.Items.Clear();
 
-            this.AddClipboardHistory();
-
-            this.AddClipboardRules();
+            trayIcon.ContextMenuStrip.Items.Add(GetOptionsMenuItem());
 
             if (ClipboardHistory.Any())
             {
                 trayIcon.ContextMenuStrip.Items.Add(new ToolStripSeparator());
             }
 
+            this.AddClipboardHistory();
+
+            this.AddClipboardRules();
+
             if (!ClipboardHistory.SavingEnabled)
             {
+                trayIcon.ContextMenuStrip.Items.Add(new ToolStripSeparator());
+
                 trayIcon.ContextMenuStrip.Items.Add(new ToolStripMenuItem("Saving Disabled") { Enabled = false });
 
                 trayIcon.ContextMenuStrip.Items.Add(new ToolStripMenuItem("Enable Clipboard Monitoring", null, ToggleSaving));
-
-                trayIcon.ContextMenuStrip.Items.Add(new ToolStripSeparator());
             }
-
-            trayIcon.ContextMenuStrip.Items.Add(GetSettingsMenuItem());
-
-            trayIcon.ContextMenuStrip.Items.Add(new ToolStripMenuItem("Exit", null, Exit));
         }
 
-        private ToolStripMenuItem GetSettingsMenuItem()
+        private ToolStripMenuItem GetOptionsMenuItem()
         {
-            ToolStripMenuItem menuItem = new ToolStripMenuItem("Settings");
+            var menuItem = new ToolStripMenuItem("Options");
 
-            menuItem.DropDownItems.Add(new ToolStripMenuItem("Show Quick Actions Notifications", null, ToggleHUD) { Checked = Configuration.ShowHUD });
+            menuItem.DropDownItems.Add(new ToolStripMenuItem("Show Quick Actions Notifications", null, ToggleHUD) { Checked = Configuration.ShowHUD, ToolTipText = "Show notification if a special pattern is recognized" });
 
             if (Configuration.ShowHUD)
             {
@@ -276,6 +274,10 @@ namespace ClipboardManager
             {
                 menuItem.DropDownItems.Add(new ToolStripMenuItem("Disable Clipboard Monitoring", null, ToggleSaving));
             }
+
+            menuItem.DropDownItems.Add(new ToolStripSeparator());
+
+            menuItem.DropDownItems.Add(new ToolStripMenuItem("Exit", null, Exit));
 
             return menuItem;
         }
@@ -311,14 +313,6 @@ namespace ClipboardManager
         private void ToggleLimitNotification(object sender, EventArgs e)
         {
             Configuration.LimitNotificationCount = !Configuration.LimitNotificationCount;
-            Configuration.Save();
-
-            DrawMenuItems();
-        }
-
-        private void ToggleAlwaysShowNotifications(object sender, EventArgs e)
-        {
-            Configuration.AlwaysShowNotifications = !Configuration.AlwaysShowNotifications;
             Configuration.Save();
 
             DrawMenuItems();
@@ -510,8 +504,8 @@ namespace ClipboardManager
 
             if (label.Length > EllipsisLength + 1)
             {
-                return (label : String.Concat(label.Substring(0, EllipsisLength).TrimEnd(), "…").PadRight(EllipsisLength + 5),
-                        length : String.Format("[+{0:N0}c]", label.Length - EllipsisLength));
+                return (label: String.Concat(label.Substring(0, EllipsisLength).TrimEnd(), "…").PadRight(EllipsisLength + 5),
+                        length: String.Format("[+{0:N0}c]", label.Length - EllipsisLength));
             }
             else
             {
