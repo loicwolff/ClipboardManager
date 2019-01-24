@@ -1,19 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Runtime.InteropServices;
-using System.Windows.Forms;
-
-namespace ClipboardManager
+﻿namespace ClipboardManager
 {
+    using System;
+    using System.Windows.Forms;
+
     /// <summary>
     /// http://stackoverflow.com/questions/2450373/set-global-hotkeys-using-c-sharp
     /// </summary>
     public sealed class KeyboardHook : IDisposable
     {
-
-
         /// <summary>
         /// Represents the window that is used internally to get the messages.
         /// </summary>

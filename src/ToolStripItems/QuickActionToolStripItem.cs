@@ -1,13 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-
-namespace ClipboardManager
+﻿namespace ClipboardManager
 {
+    using System;
+    using System.Drawing;
+    using System.Linq;
+    using System.Windows.Forms;
+    
     public class QuickActionToolStripItem : ToolStripControlHost
     {
         public event EventHandler ItemClicked;
@@ -19,13 +16,13 @@ namespace ClipboardManager
             Margin = new Padding(0);
             Padding = new Padding(0);
 
-            FlowLayoutPanel mainPanel = this.Control as FlowLayoutPanel;
+            var mainPanel = this.Control as FlowLayoutPanel;
             mainPanel.BackColor = Color.Transparent;
             mainPanel.Padding = new Padding(0);
             mainPanel.Margin = new Padding(0);
             mainPanel.FlowDirection = FlowDirection.TopDown;
 
-            foreach (QuickAction action in clipboardRule.QuickActions.AsEnumerable().Reverse())
+            foreach (var action in clipboardRule.QuickActions.Reverse())
             {
                 var buttonPanel = new FlowLayoutPanel
                 {
@@ -53,7 +50,7 @@ namespace ClipboardManager
                 openButton.Click += (object sender, EventArgs e) =>
                 {
                     ItemClicked?.Invoke(this, e);
-
+                    
                     action.Start(clipboardRule.Values);
                 };
 

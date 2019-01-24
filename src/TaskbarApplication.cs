@@ -1,18 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Deployment.Application;
-using System.Diagnostics;
-using System.Drawing;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Text.RegularExpressions;
-using System.Windows.Forms;
-using ClipboardManager.Properties;
-
-namespace ClipboardManager
+﻿namespace ClipboardManager
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Drawing;
+    using System.IO;
+    using System.Linq;
+    using System.Reflection;
+    using System.Text.RegularExpressions;
+    using System.Windows.Forms;
+    using ClipboardManager.Properties;
+
     using Clipboard = SafeClipboard;
 
     public class TaskbarApplication : ApplicationContext
@@ -47,11 +44,11 @@ namespace ClipboardManager
 
         private Lazy<Configuration> configuration = new Lazy<Configuration>(() => Configuration.Load());
 
-        private IReadOnlyList<ClipboardRule> ClipboardRules = new List<ClipboardRule>();
+        private IReadOnlyList<ClipboardRule> ClipboardRules { get; set; }
 
-        private KeyboardHook keyboardHook;
+        private KeyboardHook KeyboardHook { get; set; }
 
-        private NotifyIcon trayIcon;
+        private NotifyIcon TrayIcon { get; set; }
 
         #endregion
 
@@ -81,7 +78,7 @@ namespace ClipboardManager
 
         public TaskbarApplication()
         {
-            trayIcon = new NotifyIcon()
+            TrayIcon = new NotifyIcon()
             {
                 Icon = mainIcon,
                 Visible = true,
@@ -91,20 +88,20 @@ namespace ClipboardManager
 
             // add left click to the systray icon
             // source: https://stackoverflow.com/a/3581311/12008
-            trayIcon.MouseClick += (sender, mouseEvent) =>
+            TrayIcon.MouseClick += (sender, mouseEvent) =>
             {
                 if (mouseEvent.Button == MouseButtons.Left)
                 {
                     MethodInfo mi = typeof(NotifyIcon).GetMethod("ShowContextMenu", BindingFlags.Instance | BindingFlags.NonPublic);
-                    mi?.Invoke(trayIcon, null);
+                    mi?.Invoke(TrayIcon, null);
                 }
             };
 
-            keyboardHook = new KeyboardHook();
+            KeyboardHook = new KeyboardHook();
 
             try
             {
-                keyboardHook.RegisterHotkey(ModifierKeys.Win | ModifierKeys.Shift, Keys.C);
+                KeyboardHook.RegisterHotkey(ModifierKeys.Win | ModifierKeys.Shift, Keys.C);
             }
             catch (Exception)
             {
@@ -113,7 +110,7 @@ namespace ClipboardManager
 
             try
             {
-                keyboardHook.RegisterHotkey(ModifierKeys.Win | ModifierKeys.Shift, Keys.W);
+                KeyboardHook.RegisterHotkey(ModifierKeys.Win | ModifierKeys.Shift, Keys.W);
             }
             catch (Exception)
             {
@@ -122,7 +119,7 @@ namespace ClipboardManager
 
             try
             {
-                keyboardHook.RegisterHotkey(ModifierKeys.Win | ModifierKeys.Shift, Keys.X);
+                KeyboardHook.RegisterHotkey(ModifierKeys.Win | ModifierKeys.Shift, Keys.X);
             }
             catch (Exception)
             {
@@ -131,14 +128,14 @@ namespace ClipboardManager
 
             try
             {
-                keyboardHook.RegisterHotkey(ModifierKeys.Win | ModifierKeys.Shift, Keys.D);
+                KeyboardHook.RegisterHotkey(ModifierKeys.Win | ModifierKeys.Shift, Keys.D);
             }
             catch (Exception)
             {
                 //Trace.TraceWarning("Cannot register Win + Shift + D");
             }
 
-            keyboardHook.KeyPressed += KeyboardHook_KeyPressed;
+            KeyboardHook.KeyPressed += KeyboardHook_KeyPressed;
 
             ClipboardHistory.OnHistoryChanged += OnClipboardHistoryChanged;
 
@@ -177,12 +174,12 @@ namespace ClipboardManager
                     }
                 };
 
-                trayIcon.ContextMenuStrip.Items.Add(trayIconMenuItem);
+                TrayIcon.ContextMenuStrip.Items.Add(trayIconMenuItem);
             }
 
             if (this.ClipboardHistory.CurrentClip.IsEmpty)
             {
-                trayIcon.ContextMenuStrip.Items.Add(new ToolStripMenuItem("Clipboard is empty")
+                TrayIcon.ContextMenuStrip.Items.Add(new ToolStripMenuItem("Clipboard is empty")
                 {
                     Enabled = false,
                 });
@@ -197,35 +194,35 @@ namespace ClipboardManager
 
                 int width = actions.Max(a => TextRenderer.MeasureText(a.OpenLabel, SystemFonts.DefaultFont).Width);
 
-                trayIcon.ContextMenuStrip.Items.Add(new ToolStripSeparator());
-                trayIcon.ContextMenuStrip.Items.Add(new LabelToolStripItem("Quick Actions"));
+                TrayIcon.ContextMenuStrip.Items.Add(new ToolStripSeparator());
+                TrayIcon.ContextMenuStrip.Items.Add(new LabelToolStripItem("Quick Actions"));
 
                 foreach (ClipboardRule rule in ClipboardRules)
                 {
                     var quickActionMenuItem = new QuickActionToolStripItem(rule, width);
                     quickActionMenuItem.ItemClicked += (object sender, EventArgs e) =>
                     {
-                        trayIcon.ContextMenuStrip.Close(ToolStripDropDownCloseReason.ItemClicked);
+                        TrayIcon.ContextMenuStrip.Close(ToolStripDropDownCloseReason.ItemClicked);
                     };
                     quickActionMenuItem.CopyItemClicked += (object sender, EventArgs e) =>
                     {
-                        trayIcon.ContextMenuStrip.Close(ToolStripDropDownCloseReason.ItemClicked);
+                        TrayIcon.ContextMenuStrip.Close(ToolStripDropDownCloseReason.ItemClicked);
                     };
 
-                    trayIcon.ContextMenuStrip.Items.Add(quickActionMenuItem);
+                    TrayIcon.ContextMenuStrip.Items.Add(quickActionMenuItem);
                 }
             }
         }
 
         private void DrawMenuItems()
         {
-            trayIcon.ContextMenuStrip.Items.Clear();
+            TrayIcon.ContextMenuStrip.Items.Clear();
 
-            trayIcon.ContextMenuStrip.Items.Add(GetOptionsMenuItem());
+            TrayIcon.ContextMenuStrip.Items.Add(GetOptionsMenuItem());
 
             if (ClipboardHistory.Any())
             {
-                trayIcon.ContextMenuStrip.Items.Add(new ToolStripSeparator());
+                TrayIcon.ContextMenuStrip.Items.Add(new ToolStripSeparator());
             }
 
             this.AddClipboardHistory();
@@ -234,11 +231,11 @@ namespace ClipboardManager
 
             if (!ClipboardHistory.SavingEnabled)
             {
-                trayIcon.ContextMenuStrip.Items.Add(new ToolStripSeparator());
+                TrayIcon.ContextMenuStrip.Items.Add(new ToolStripSeparator());
 
-                trayIcon.ContextMenuStrip.Items.Add(new ToolStripMenuItem("Saving Disabled") { Enabled = false });
+                TrayIcon.ContextMenuStrip.Items.Add(new ToolStripMenuItem("Saving Disabled") { Enabled = false });
 
-                trayIcon.ContextMenuStrip.Items.Add(new ToolStripMenuItem("Enable Clipboard Monitoring", null, ToggleSaving));
+                TrayIcon.ContextMenuStrip.Items.Add(new ToolStripMenuItem("Enable Clipboard Monitoring", null, ToggleSaving));
             }
         }
 
@@ -260,7 +257,7 @@ namespace ClipboardManager
                         Configuration.MaxNotificationCount = e.NotificationCount;
                         Configuration.Save();
 
-                        this.trayIcon.ContextMenuStrip.Close();
+                        this.TrayIcon.ContextMenuStrip.Close();
                     };
                     menuItem.DropDownItems.Add(notificationCountItem);
                 }
@@ -287,7 +284,7 @@ namespace ClipboardManager
             if (MessageBox.Show("Quit Clipboard Manager?\nYour clipboard will no longer be saved.", "Clipboard Manager", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2) == DialogResult.Yes)
             {
                 // Hide tray icon, otherwise it will remain shown until user mouses over it
-                trayIcon.Visible = false;
+                TrayIcon.Visible = false;
 
                 Application.Exit();
             }
@@ -297,7 +294,7 @@ namespace ClipboardManager
         {
             ClipboardHistory.ToggleSavingEnabled();
 
-            this.trayIcon.Icon = ClipboardHistory.SavingEnabled ? this.mainIcon : this.DisabledIcon;
+            this.TrayIcon.Icon = ClipboardHistory.SavingEnabled ? this.mainIcon : this.DisabledIcon;
 
             DrawMenuItems();
         }

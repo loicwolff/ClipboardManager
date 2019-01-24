@@ -1,12 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-
-namespace ClipboardManager
+﻿namespace ClipboardManager
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Diagnostics;
+    using System.Linq;
+    using System.Text.RegularExpressions;
+
     [DebuggerDisplay("Type: {Type}")]
     public class ClipboardRule
     {
@@ -76,11 +75,11 @@ namespace ClipboardManager
             }
         }
 
-        public List<QuickAction> QuickActions { get; set; }
+        public IList<QuickAction> QuickActions { get; set; }
 
         public virtual bool IsMatch(string input, out string[] output)
         {
-            Match match = RuleRegex.Match(input);
+            var match = RuleRegex.Match(input);
             
             if (match.Success)
             {

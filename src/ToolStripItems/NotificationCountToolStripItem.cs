@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-
-namespace ClipboardManager
+﻿namespace ClipboardManager
 {
+    using System;
+    using System.Drawing;
+    using System.Windows.Forms;
+
     public class NotificationCountToolStripItem : ToolStripControlHost
     {
         public event NotificationCountEventHandler ValueChanged;
@@ -15,7 +11,7 @@ namespace ClipboardManager
         public NotificationCountToolStripItem(int currentSelection)
             : base(new FlowLayoutPanel())
         {
-            FlowLayoutPanel mainPanel = Control as FlowLayoutPanel;
+            var mainPanel = Control as FlowLayoutPanel;
             mainPanel.BackColor = Color.Transparent;
             mainPanel.FlowDirection = FlowDirection.TopDown;
             mainPanel.AutoSize = false;

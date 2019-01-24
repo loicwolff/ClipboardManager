@@ -1,16 +1,12 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Serialization;
-using Newtonsoft.Json;
-
-namespace ClipboardManager
+﻿namespace ClipboardManager
 {
+    using System;
+    using System.Collections;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Linq;
+    using Newtonsoft.Json;
+
     public class NewClipItemEventEventArgs : EventArgs
     {
         public ClipItem PreviousClipItem { get; set; }
@@ -22,9 +18,9 @@ namespace ClipboardManager
         public event EventHandler<NewClipItemEventEventArgs> OnHistoryChanged;
 
         private const string JsonClipsFile = "clips.json";
-        
+
         private const int MaxClipCount = 30;
-        
+
         /// <summary>
         /// Indique si la sauvegarde est activée
         /// </summary>
@@ -44,7 +40,7 @@ namespace ClipboardManager
             LoadHistory();
 
             AddClipItem(SafeClipboard.CurrentClipItem);
-            
+
             ClipboardNotifier.ClipboardUpdate += ClipboardNotifier_ClipboardUpdate;
         }
 
@@ -66,7 +62,7 @@ namespace ClipboardManager
         {
             if (SavingEnabled)
             {
-                ClipItem previousClip = CurrentClip;
+                var previousClip = CurrentClip;
 
                 CurrentClip = clipItem;
 
@@ -145,31 +141,25 @@ namespace ClipboardManager
 
         private static List<ClipItem> LoadFromJsonCore(string jsonFilePath)
         {
-            List<ClipItem> items = new List<ClipItem>();
-
-            using (StreamReader reader = new StreamReader(jsonFilePath))
+            using (var reader = new StreamReader(jsonFilePath))
             {
                 string content;
                 if (!String.IsNullOrWhiteSpace((content = reader.ReadToEnd())))
                 {
                     try
                     {
-                        items = JsonConvert.DeserializeObject<List<ClipItem>>(content);
+                        return JsonConvert.DeserializeObject<List<ClipItem>>(content);
                     }
-                    catch (Exception)
-                    {
-                        //Trace.TraceError("Erreur de lecture de clips.json");
-                        items = new List<ClipItem>();
-                    }
+                    catch (Exception) { }
                 }
             }
 
-            return items;
+            return new List<ClipItem>();
         }
 
         private void Save()
         {
-            using (StreamWriter writer = new StreamWriter(LocalDataJsonClipsFile))
+            using (var writer = new StreamWriter(LocalDataJsonClipsFile))
             {
                 string json = JsonConvert.SerializeObject(Clips, Formatting.Indented);
                 writer.Write(json);

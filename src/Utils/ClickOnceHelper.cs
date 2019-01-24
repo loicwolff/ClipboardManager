@@ -1,9 +1,9 @@
-﻿using System;
-using System.Deployment.Application;
-using System.IO;
-
-namespace ClipboardManager
+﻿namespace ClipboardManager
 {
+    using System;
+    using System.Deployment.Application;
+    using System.IO;
+
     public static class ClickOnceHelper
     {
         public static void AddShortcutToStartupGroup(string publisherName, string productName)
