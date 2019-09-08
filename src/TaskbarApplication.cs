@@ -86,6 +86,8 @@
                 Text = "Clipboard Manager",
             };
 
+            TrayIcon.ContextMenuStrip.RenderMode = ToolStripRenderMode.System;
+
             // add left click to the systray icon
             // source: https://stackoverflow.com/a/3581311/12008
             TrayIcon.MouseClick += (sender, mouseEvent) =>
@@ -153,7 +155,6 @@
             foreach (ClipItem clip in ClipboardHistory)
             {
                 var (label, length) = Ellipsis(clip.Text);
-
                 bool isInClipboard = clip == ClipboardHistory.CurrentClip;
 
                 var trayIconMenuItem = new ToolStripMenuItem(label)
@@ -490,7 +491,7 @@
             }
         }
 
-        private static (string label, string length) Ellipsis(string label)
+        private static (string, string) Ellipsis(string label)
         {
             if (String.IsNullOrWhiteSpace(label))
             {
@@ -501,8 +502,8 @@
 
             if (label.Length > EllipsisLength + 1)
             {
-                return (label: String.Concat(label.Substring(0, EllipsisLength).TrimEnd(), "…").PadRight(EllipsisLength + 5),
-                        length: String.Format("[+{0:N0}c]", label.Length - EllipsisLength));
+                return (String.Concat(label.Substring(0, EllipsisLength).TrimEnd(), "…").PadRight(EllipsisLength + 5),
+                        String.Format("[{0:N0}c]", label.Length));
             }
             else
             {
