@@ -25,7 +25,7 @@
                     BackColor = Color.Transparent,
                     FlowDirection = FlowDirection.LeftToRight,
                     AutoSize = false,
-                    Height = 22,
+                    Height = 45,
                     Margin = new Padding(0),
                     Padding = new Padding(0)
                 };
@@ -36,8 +36,8 @@
                     {
                         BackColor = Color.Transparent,
                         Text = i.ToString(CultureInfo.InvariantCulture),
-                        Width = 30,
-                        Height = 18,
+                        Width = 40,
+                        Height = 45,
                         Checked = currentSelection == i,
                         Tag = i,
                         Enabled = this.Enabled,
@@ -53,8 +53,8 @@
                     Text = "Max Notifications Count",
                     ForeColor = Color.Gray,
                     BackColor = Color.Transparent,
-                    Height = 17,
-                    Width = 200,
+                    Height = 20,
+                    Width = 250,
                 };
 
                 mainPanel.Controls.Add(maxNotificationLabel);
