@@ -29,7 +29,7 @@
                     BackColor = Color.Transparent,
                     FlowDirection = FlowDirection.LeftToRight,
                     AutoSize = false,
-                    Height = 25,
+                    Height = 40,
                     Width = 275,
                     Margin = new Padding(0),
                     Padding = new Padding(0),
@@ -43,6 +43,7 @@
                     Padding = new Padding(0),
                     Margin = new Padding(0),
                     Width = buttonWidth + 40,
+                    Height = 35,
                 };
 
                 openButton.MinimumSize = openButton.Size;
@@ -64,6 +65,7 @@
                         Text = "Copy Link",
                         Padding = new Padding(0),
                         Margin = new Padding(0),
+                        Height = 35,
                     };
 
                     copyButton.Click += (object sender, EventArgs e) =>
