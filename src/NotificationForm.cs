@@ -59,7 +59,7 @@ namespace ClipboardManager
         /// <param name="label"></param>
         public NotificationForm(TaskbarApplication app, string label) : this(app)
         {
-            Height = 30;
+            Height = 40;
 
             CopyLinkButton.Visible = false;
             CopyLinkButton.Enabled = false;
