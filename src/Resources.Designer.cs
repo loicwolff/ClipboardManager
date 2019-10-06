@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace ClipboardManager.Properties {
+namespace ClipboardManager {
     using System;
     
     
@@ -39,7 +39,7 @@ namespace ClipboardManager.Properties {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("ClipboardManager.Properties.Resources", typeof(Resources).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("ClipboardManager.Resources", typeof(Resources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -63,9 +63,9 @@ namespace ClipboardManager.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap clip {
+        internal static System.Drawing.Bitmap clip_disabled {
             get {
-                object obj = ResourceManager.GetObject("clip", resourceCulture);
+                object obj = ResourceManager.GetObject("clip_disabled", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -73,9 +73,9 @@ namespace ClipboardManager.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap clip_disabled {
+        internal static System.Drawing.Bitmap clip_white {
             get {
-                object obj = ResourceManager.GetObject("clip_disabled", resourceCulture);
+                object obj = ResourceManager.GetObject("clip_white", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

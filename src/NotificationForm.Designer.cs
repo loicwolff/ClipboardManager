@@ -13,9 +13,9 @@
         /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
         protected override void Dispose(bool disposing)
         {
-            if (disposing)
+            if (disposing && (components != null))
             {
-                components?.Dispose();
+                components.Dispose();
             }
             base.Dispose(disposing);
         }
@@ -28,6 +28,8 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
+
             this.CopyLinkButton = new ClipboardManager.NonSelectableButton();
             this.OpenLinkButton = new ClipboardManager.NonSelectableButton();
             this.SuspendLayout();
@@ -97,14 +99,12 @@
             this.MouseEnter += new System.EventHandler(this.OnMouseEnter);
             this.MouseLeave += new System.EventHandler(this.OnMouseLeave);
             this.ResumeLayout(false);
-
         }
 
         #endregion
 
         private NonSelectableButton OpenLinkButton;
         private NonSelectableButton CopyLinkButton;
-
 
     }
 }

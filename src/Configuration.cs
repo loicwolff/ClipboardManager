@@ -19,19 +19,19 @@ namespace ClipboardManager
         private const bool DefaultLimitNotificationCount = false;
 
         /// <summary>
-        /// Indique s'il faut limiter le nombre de notification à afficher
+        /// Indicate if the number of notification to display is limited
         /// </summary>
         [DefaultValue(DefaultLimitNotificationCount)]
         public bool LimitNotificationCount { get; set; }
 
         /// <summary>
-        /// Indique s'il faut afficher les notifications
+        /// Indicate whether to show the notifications
         /// </summary>
         [DefaultValue(DefaultShowHUD)]
         public bool ShowHUD { get; set; }
 
         /// <summary>
-        /// Nombre max de notification
+        /// Maximum number of notifications
         /// </summary>
         [DefaultValue(DefaultNotificationCount)]
         public int MaxNotificationCount { get; set; }
@@ -45,16 +45,7 @@ namespace ClipboardManager
 
         public static Configuration Load()
         {
-            if (File.Exists(ConfigurationFile))
-            {
-                Configuration configuration = LoadFromLegacyConfiguration();
-                configuration.Save();
-
-                File.Delete(ConfigurationFile);
-
-                return configuration;
-            }
-            else if (File.Exists(LocalDataConfigurationFile))
+            if (File.Exists(LocalDataConfigurationFile))
             {
                 return LoadFromConfigurationFile();
             }
@@ -66,15 +57,11 @@ namespace ClipboardManager
             }
         }
 
-        private static Configuration LoadFromConfigurationFile() => LoadFromConfigurationCore(LocalDataConfigurationFile);
-
-        private static Configuration LoadFromLegacyConfiguration() => LoadFromConfigurationCore(ConfigurationFile);
-
-        private static Configuration LoadFromConfigurationCore(string configurationFilePath)
+        private static Configuration LoadFromConfigurationFile()
         {
             XmlSerializer serializer = new XmlSerializer(typeof(Configuration));
 
-            using (StreamReader reader = new StreamReader(configurationFilePath))
+            using (StreamReader reader = new StreamReader(LocalDataConfigurationFile))
             {
                 return serializer.Deserialize(reader) as Configuration;
             }

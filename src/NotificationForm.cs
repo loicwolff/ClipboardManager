@@ -3,12 +3,9 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
-using System.Linq;
-using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using ClipboardManager.Properties;
 
 namespace ClipboardManager
 {
@@ -17,7 +14,7 @@ namespace ClipboardManager
         public event MouseEventHandler OpenClick;
         public event MouseEventHandler CopyLinkClick;
         public event MouseEventHandler RightClick;
-        
+
         private const int SW_SHOWNOACTIVATE = 4;
         private const int HWND_TOPMOST = -1;
         private const uint SWP_NOACTIVATE = 0x0010;

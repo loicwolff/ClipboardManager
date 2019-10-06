@@ -8,7 +8,6 @@
     using System.Reflection;
     using System.Text.RegularExpressions;
     using System.Windows.Forms;
-    using ClipboardManager.Properties;
 
     using Clipboard = SafeClipboard;
 
@@ -39,10 +38,10 @@
         private const int EllipsisLength = 30;
         private const int MaxClipCount = 30;
 
-        private readonly Icon mainIcon = Icon.FromHandle(Resources.clip.GetHicon());
+        private readonly Icon mainIcon = Icon.FromHandle(Resources.clip_white.GetHicon());
         private readonly Icon disabledIcon = Icon.FromHandle(Resources.clip_disabled.GetHicon());
 
-        private Lazy<Configuration> configuration = new Lazy<Configuration>(() => Configuration.Load());
+        private readonly Lazy<Configuration> configuration = new Lazy<Configuration>(() => Configuration.Load());
 
         private IReadOnlyList<ClipboardRule> ClipboardRules { get; set; }
 

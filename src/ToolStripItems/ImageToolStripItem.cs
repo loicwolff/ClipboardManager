@@ -14,7 +14,7 @@ namespace ClipboardManager
 
         public Panel MainPanel { get; set; }
 
-        public Image BackgroundImage { get; set; }
+        public Image Background { get; set; }
 
         public ImageToolStripItem(Image image, ImageToolStripEventHandler eventHandler) : base(new Panel())
         {
@@ -22,7 +22,7 @@ namespace ClipboardManager
 
             ImageClicked = eventHandler;
 
-            BackgroundImage = image;
+            Background = image;
 
             this.MainPanel = this.Control as Panel;
             MainPanel.BackgroundImage = image;
@@ -32,14 +32,13 @@ namespace ClipboardManager
             MainPanel.AutoSize = false;
             MainPanel.Size = new System.Drawing.Size(200, 75);
             MainPanel.MinimumSize = MainPanel.Size;
-            //MainPanel.Click += MainPanel_Click;
         }
 
         void OnClick(object sender, EventArgs e)
         {
             if (ImageClicked != null)
             {
-                ImageClicked(this, new ImageToolStripEventArgs(BackgroundImage));
+                ImageClicked(this, new ImageToolStripEventArgs(Background));
             }
         }
 
@@ -47,7 +46,7 @@ namespace ClipboardManager
         {
             if (ImageClicked != null)
             {
-                ImageClicked(this, new ImageToolStripEventArgs(BackgroundImage));
+                ImageClicked(this, new ImageToolStripEventArgs(Background));
             }
         }
     }

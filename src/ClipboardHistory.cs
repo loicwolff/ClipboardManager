@@ -5,7 +5,7 @@
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
-    using Newtonsoft.Json;
+    using System.Text.Json;
 
     public class NewClipItemEventEventArgs : EventArgs
     {
@@ -148,7 +148,7 @@
                 {
                     try
                     {
-                        return JsonConvert.DeserializeObject<List<ClipItem>>(content);
+                        return JsonSerializer.Deserialize<List<ClipItem>>(content);
                     }
                     catch (Exception) { }
                 }
@@ -161,7 +161,7 @@
         {
             using (var writer = new StreamWriter(LocalDataJsonClipsFile))
             {
-                string json = JsonConvert.SerializeObject(Clips, Formatting.Indented);
+                string json = JsonSerializer.Serialize<List<ClipItem>>(Clips, new JsonSerializerOptions() { WriteIndented = true });
                 writer.Write(json);
             }
         }

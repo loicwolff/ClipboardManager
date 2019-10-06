@@ -1,24 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.Drawing;
-using System.Drawing.Imaging;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Serialization;
-using Newtonsoft.Json;
-
-namespace ClipboardManager
+﻿namespace ClipboardManager
 {
+    using System;
+    using System.Diagnostics;
+    using System.Text.Json.Serialization;
+
     [DebuggerDisplay("Text = {Text}")]
     public class ClipItem
     {
         public static readonly ClipItem Empty = new ClipItem { Text = String.Empty };
         
-        [JsonProperty("text")]
+        [JsonPropertyName("text")]
         public string Text { get; set; }
 
         [JsonIgnore]
