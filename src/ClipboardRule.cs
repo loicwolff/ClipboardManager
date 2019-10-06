@@ -2,25 +2,24 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Globalization;
     using System.Linq;
     using System.Text.RegularExpressions;
 
     public class ClipboardRule
     {
-        public static IEnumerable<ClipboardRule> GetMatchingRules(string text)
+        public static IEnumerable<RuleResult> GetMatchingRules(string? text)
         {
             if (!String.IsNullOrWhiteSpace(text))
             {
                 foreach (var rule in ClipboardRules)
                 {
-                    if (rule.IsMatch(text, out string[] values))
+                    if (rule.IsMatch(text, out var values))
                     {
-                        yield return new ClipboardRule
-                        {
-                            Label = String.Format(rule.Label, values),
-                            Values = values,
-                            QuickActions = rule.QuickActions,
-                        };
+                        yield return new RuleResult(
+                            String.Format(CultureInfo.CurrentCulture, rule.Label, values),
+                            values,
+                            rule.QuickActions);
                     }
                 }
             }
@@ -28,11 +27,9 @@
 
         internal static List<ClipboardRule> ClipboardRules = new List<ClipboardRule>()
         {
-            new ClipboardRule
-            {
-                Label = "Redmine issue",
+            new ClipboardRule(label: "Redmine issue",
                 /*language=regex*/
-                RegexPattern = @"
+                pattern: @"
                     ^
                     \s*
                     (?i:
@@ -46,22 +43,16 @@
                     \s*
                     $
                     ",
-                QuickActions = new List<QuickAction>()
+                actions: new List<UrlQuickAction>()
                 {
-                    new QuickAction
-                    {
-                        CanCopy = true,
-                        Name = "Redmine",
-                        OpenLabel = "Open Redmine issue",
-                        Url = "https://redmine.neovici.se/issues/{1}",
-                    }
-                }
-            },
-            new ClipboardRule
-            {
-                Label = "DevOps PR",
+                    new UrlQuickAction(
+                        "Redmine",
+                        "Open Redmine issue",
+                        "https://redmine.neovici.se/issues/{1}"),
+                }),
+            new ClipboardRule(label: "DevOps PR",
                 /*language=regex*/
-                RegexPattern = @"
+                pattern: @"
                     (?i)
                     ^
                     \s*
@@ -70,70 +61,57 @@
                     \s*
                     $
                     ",
-                QuickActions = new List<QuickAction>()
+                actions: new List<UrlQuickAction>()
                 {
-                    new QuickAction
-                    {
-                        CanCopy = true,
-                        Name = "Pull Request",
-                        OpenLabel = "View Pull Request",
-                        Url = "https://neovici.visualstudio.com/Cosmoz3/Cosmoz3%20Team/_git/cz3backend/pullrequest/{1}",
-                    }
-                }
-            },
-            new ClipboardRule
-            {
-                Label = "Guid",
-                /*language=regex*/
-                RegexPattern = @"
-                    (?im)                       
-                    ^
-                    \s*
-                    [{(]?
-                    [0-9A-F]{8}
-                    [-]?
-                    (?:[0-9A-F]{4}[-]?){3}
-                    [0-9A-F]{12}
-                    [)}]? 
-                    \s*
-                    $",
-                QuickActions = new List<QuickAction>()
-                {
-                    new QuickAction
-                    {
-                        CanCopy = true,
-                        Name = "Guid",
-                        OpenLabel = "Copy guid",
-                    }
-                }
-            },
+                    new UrlQuickAction(
+                        name: "Pull Request",
+                        label: "View Pull Request",
+                        "https://neovici.visualstudio.com/Cosmoz3/Cosmoz3%20Team/_git/cz3backend/pullrequest/{1}")
+                })
+            //new ClipboardRule(
+            //    label: "Guid",
+            //    /*language=regex*/
+            //    pattern: @"
+            //        (?im)                       
+            //        ^
+            //        \s*
+            //        [{(]?
+            //        [0-9A-F]{8}
+            //        [-]?
+            //        (?:[0-9A-F]{4}[-]?){3}
+            //        [0-9A-F]{12}
+            //        [)}]? 
+            //        \s*
+            //        $",
+            //    actions: new List<UrlQuickAction>()
+            //    {
+            //        new ExtractQuickAction(name: "Guid", label: "Copy guid", )
+            //        {
+            //            CanCopy = true,
+            //            Name = "Guid",
+            //            OpenLabel = "Copy guid",
+            //        }
+            //    })
+            
         };
 
-        public ClipboardRule()
+        public ClipboardRule(string label, string pattern, IReadOnlyCollection<QuickAction> actions)
         {
-            QuickActions = new List<QuickAction>();
-            Label = "{0}";
+            this.Label = label;
+            this.RuleRegex = new Regex(pattern, RegexOptions.IgnorePatternWhitespace);
+            this.QuickActions = actions;
+            this.Label = "{0}";
         }
 
         public string Label { get; set; }
 
-        public IReadOnlyCollection<string> Values { get; set; }
-
         public Regex RuleRegex { get; private set; }
 
-        public string RegexPattern
-        {
-            set
-            {
-                RuleRegex = new Regex(value, RegexOptions.IgnorePatternWhitespace);
-            }
-        }
-
-        public IList<QuickAction> QuickActions { get; set; }
+        public IReadOnlyCollection<QuickAction> QuickActions { get; set; }
 
         public virtual bool IsMatch(string input, out string[] output)
         {
-            var match = RuleRegex.Match(input);
+            var match = this.RuleRegex.Match(input);
 
             if (match.Success)
             {
@@ -142,7 +120,7 @@
                 return true;
             }
 
-            output = null;
+            output = Array.Empty<string>();
 
             return false;
         }

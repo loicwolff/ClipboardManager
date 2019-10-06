@@ -1,14 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Xml.Serialization;
+﻿using System.ComponentModel;
 using System.IO;
-using System.ComponentModel;
+using System.Xml;
+using System.Xml.Serialization;
 
 namespace ClipboardManager
 {
-    public class Configuration
+    public class AppConfiguration
     {
         public const string ConfigurationFile = "configuration.xml";
 
@@ -36,14 +33,14 @@ namespace ClipboardManager
         [DefaultValue(DefaultNotificationCount)]
         public int MaxNotificationCount { get; set; }
 
-        public Configuration()
+        public AppConfiguration()
         {
-            ShowHUD = DefaultShowHUD;
-            MaxNotificationCount = DefaultNotificationCount;
-            LimitNotificationCount = DefaultLimitNotificationCount;
+            this.ShowHUD = DefaultShowHUD;
+            this.MaxNotificationCount = DefaultNotificationCount;
+            this.LimitNotificationCount = DefaultLimitNotificationCount;
         }
 
-        public static Configuration Load()
+        public static AppConfiguration Load()
         {
             if (File.Exists(LocalDataConfigurationFile))
             {
@@ -51,20 +48,19 @@ namespace ClipboardManager
             }
             else
             {
-                Configuration configuration = new Configuration();
+                AppConfiguration configuration = new AppConfiguration();
                 configuration.Save();
                 return configuration;
             }
         }
 
-        private static Configuration LoadFromConfigurationFile()
+        private static AppConfiguration LoadFromConfigurationFile()
         {
-            XmlSerializer serializer = new XmlSerializer(typeof(Configuration));
+            XmlSerializer serializer = new XmlSerializer(typeof(AppConfiguration));
 
-            using (StreamReader reader = new StreamReader(LocalDataConfigurationFile))
-            {
-                return serializer.Deserialize(reader) as Configuration;
-            }
+            using StreamReader reader = new StreamReader(LocalDataConfigurationFile);
+            using XmlReader xmlReader = XmlReader.Create(reader);
+            return serializer.Deserialize(xmlReader) as AppConfiguration ?? new AppConfiguration();
         }
 
         public void Save()
@@ -72,12 +68,10 @@ namespace ClipboardManager
             XmlSerializerNamespaces ns = new XmlSerializerNamespaces();
             ns.Add("", "");
 
-            XmlSerializer serializer = new XmlSerializer(typeof(Configuration));
+            XmlSerializer serializer = new XmlSerializer(typeof(AppConfiguration));
 
-            using (StreamWriter writer = new StreamWriter(LocalDataConfigurationFile))
-            {
-                serializer.Serialize(writer, this, ns);
-            }
+            using StreamWriter writer = new StreamWriter(LocalDataConfigurationFile);
+            serializer.Serialize(writer, this, ns);
         }
     }
 }

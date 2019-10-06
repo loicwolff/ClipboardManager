@@ -4,82 +4,96 @@
     using System.Drawing;
     using System.Linq;
     using System.Windows.Forms;
-    
+
     public class QuickActionToolStripItem : ToolStripControlHost
     {
-        public event EventHandler ItemClicked;
-        public event EventHandler CopyItemClicked;
+        public event EventHandler? ItemClicked;
+        public event EventHandler? CopyItemClicked;
 
-        public QuickActionToolStripItem(ClipboardRule clipboardRule, int buttonWidth)
+        public QuickActionToolStripItem(RuleResult ruleResult, int buttonWidth)
             : base(new FlowLayoutPanel())
         {
-            Margin = new Padding(0);
-            Padding = new Padding(0);
-
-            var mainPanel = this.Control as FlowLayoutPanel;
-            mainPanel.BackColor = Color.Transparent;
-            mainPanel.Padding = new Padding(0);
-            mainPanel.Margin = new Padding(0);
-            mainPanel.FlowDirection = FlowDirection.TopDown;
-
-            foreach (var action in clipboardRule.QuickActions.Reverse())
+            if (ruleResult == null)
             {
-                var buttonPanel = new FlowLayoutPanel
+                throw new ArgumentNullException(nameof(ruleResult));
+            }
+
+            this.Margin = new Padding(0);
+            this.Padding = new Padding(0);
+
+            if (this.Control is FlowLayoutPanel mainPanel)
+            {
+                mainPanel.BackColor = Color.Transparent;
+                mainPanel.Padding = new Padding(0);
+                mainPanel.Margin = new Padding(0);
+                mainPanel.FlowDirection = FlowDirection.TopDown;
+
+                foreach (var action in ruleResult.QuickActions.Reverse())
                 {
-                    BackColor = Color.Transparent,
-                    FlowDirection = FlowDirection.LeftToRight,
-                    AutoSize = false,
-                    Height = 40,
-                    Width = 275,
-                    Margin = new Padding(0),
-                    Padding = new Padding(0),
-                };
-
-                var openButton = new Button()
-                {
-                    Text = action.OpenLabel,
-                    AutoSize = false,
-                    Enabled = action.IsEnabled,
-                    Padding = new Padding(0),
-                    Margin = new Padding(0),
-                    Width = buttonWidth + 40,
-                    Height = 35,
-                };
-
-                openButton.MinimumSize = openButton.Size;
-
-                openButton.Click += (object sender, EventArgs e) =>
-                {
-                    ItemClicked?.Invoke(this, e);
-                    
-                    action.Start(clipboardRule.Values);
-                };
-
-                buttonPanel.Controls.Add(openButton);
-
-                if (action.CanCopy)
-                {
-                    // Copy button
-                    var copyButton = new Button
+                    var buttonPanel = new FlowLayoutPanel
                     {
-                        Text = "Copy Link",
+                        BackColor = Color.Transparent,
+                        FlowDirection = FlowDirection.LeftToRight,
+                        AutoSize = false,
+                        Height = 40,
+                        Width = 275,
+                        Margin = new Padding(0),
+                        Padding = new Padding(0),
+                    };
+
+                    var openButton = new Button()
+                    {
+                        Text = action.OpenLabel,
+                        AutoSize = false,
+                        Enabled = action.IsEnabled,
                         Padding = new Padding(0),
                         Margin = new Padding(0),
+                        Width = buttonWidth + 40,
                         Height = 35,
                     };
 
-                    copyButton.Click += (object sender, EventArgs e) =>
-                    {
-                        CopyItemClicked?.Invoke(this, e);
+                    openButton.MinimumSize = openButton.Size;
 
-                        action.Copy(clipboardRule.Values);
+                    openButton.Click += (object? sender, EventArgs e) =>
+                    {
+                        ItemClicked?.Invoke(this, e);
+
+                        action.Run(ruleResult.Values);
                     };
 
-                    buttonPanel.Controls.Add(copyButton);
-                }
+                    buttonPanel.Controls.Add(openButton);
 
-                mainPanel.Controls.Add(buttonPanel);
+                    if (action.CanCopy)
+                    {
+                        // Copy button
+                        var copyButton = new Button
+                        {
+                            Text = "Copy Link",
+                            Padding = new Padding(0),
+                            Margin = new Padding(0),
+                            Height = 35,
+                        };
+
+                        copyButton.Click += (object? sender, EventArgs e) =>
+                        {
+                            CopyItemClicked?.Invoke(this, e);
+
+                            action.Copy(ruleResult.Values);
+                        };
+
+                        buttonPanel.Controls.Add(copyButton);
+                    }
+
+                    mainPanel.Controls.Add(buttonPanel);
+                }
             }
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            this.Control.Dispose();
+
+            base.Dispose(disposing);
         }
     }
 }

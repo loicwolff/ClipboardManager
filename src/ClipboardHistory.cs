@@ -5,17 +5,17 @@
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
-    using System.Text.Json;
+    using Newtonsoft.Json;
 
     public class NewClipItemEventEventArgs : EventArgs
     {
-        public ClipItem PreviousClipItem { get; set; }
-        public ClipItem ClipItem { get; set; }
+        public ClipItem? PreviousClipItem { get; set; }
+        public ClipItem ClipItem { get; set; } = ClipItem.Empty;
     }
 
     public class ClipboardHistoryCollection : IEnumerable<ClipItem>
     {
-        public event EventHandler<NewClipItemEventEventArgs> OnHistoryChanged;
+        public event EventHandler<NewClipItemEventEventArgs>? OnHistoryChanged;
 
         private const string JsonClipsFile = "clips.json";
 
@@ -35,20 +35,23 @@
 
         public ClipboardHistoryCollection()
         {
+            this.Clips = new List<ClipItem>();
+            this.CurrentClip = ClipItem.Empty;
+
             this.SavingEnabled = true;
 
-            LoadHistory();
+            this.LoadHistory();
 
-            AddClipItem(SafeClipboard.CurrentClipItem);
+            this.AddClipItem(SafeClipboard.CurrentClipItem);
 
-            ClipboardNotifier.ClipboardUpdate += ClipboardNotifier_ClipboardUpdate;
+            ClipboardNotifier.ClipboardUpdate += this.ClipboardNotifier_ClipboardUpdate;
         }
 
-        void ClipboardNotifier_ClipboardUpdate(object sender, ClipboardEventArgs e)
+        void ClipboardNotifier_ClipboardUpdate(object? sender, ClipboardEventArgs e)
         {
-            if (SavingEnabled)
+            if (this.SavingEnabled)
             {
-                AddClipItem(e.ClipItem);
+                this.AddClipItem(e.ClipItem);
             }
         }
 
@@ -60,84 +63,84 @@
 
         internal void AddClipItem(ClipItem clipItem)
         {
-            if (SavingEnabled)
+            if (this.SavingEnabled)
             {
-                var previousClip = CurrentClip;
+                var previousClip = this.CurrentClip;
 
-                CurrentClip = clipItem;
+                this.CurrentClip = clipItem;
 
                 if (!String.IsNullOrWhiteSpace(clipItem.Text))
                 {
-                    Clips.RemoveAll(c => c.Text == clipItem.Text);
+                    this.Clips.RemoveAll(c => c.Text == clipItem.Text);
 
-                    Clips.Add(clipItem);
+                    this.Clips.Add(clipItem);
 
-                    int overhead = Clips.Count - MaxClipCount;
+                    int overhead = this.Clips.Count - MaxClipCount;
                     if (overhead > 0)
                     {
-                        Clips = Clips.Skip(overhead).ToList();
+                        this.Clips = this.Clips.Skip(overhead).ToList();
                     }
 
-                    Save();
+                    this.Save();
                 }
 
-                SendHistoryChangedEvent(CurrentClip, previousClip);
+                this.SendHistoryChangedEvent(this.CurrentClip, previousClip);
             }
         }
 
         public void RemoveAll(ClipItem clipItem)
         {
-            Clips = Clips.Where(c => c != clipItem).ToList();
+            this.Clips = this.Clips.Where(c => c != clipItem).ToList();
 
-            if (CurrentClip == clipItem)
+            if (this.CurrentClip == clipItem)
             {
                 SafeClipboard.Clear();
-                CurrentClip = ClipItem.Empty;
+                this.CurrentClip = ClipItem.Empty;
             }
 
-            Save();
+            this.Save();
 
-            SendHistoryChangedEvent(CurrentClip);
+            this.SendHistoryChangedEvent(this.CurrentClip);
         }
 
         public void Clear()
         {
-            Clips = new List<ClipItem>();
-            CurrentClip = ClipItem.Empty;
+            this.Clips = new List<ClipItem>();
+            this.CurrentClip = ClipItem.Empty;
 
             SafeClipboard.Clear();
 
-            Save();
+            this.Save();
 
-            SendHistoryChangedEvent(ClipItem.Empty);
+            this.SendHistoryChangedEvent(ClipItem.Empty);
         }
 
         public void ToggleSavingEnabled()
         {
-            SavingEnabled = !SavingEnabled;
+            this.SavingEnabled = !this.SavingEnabled;
 
-            AddClipItem(SafeClipboard.CurrentClipItem);
+            this.AddClipItem(SafeClipboard.CurrentClipItem);
         }
 
-        private void SendHistoryChangedEvent(ClipItem newClip, ClipItem previousClip = null)
+        private void SendHistoryChangedEvent(ClipItem newClip, ClipItem? previousClip = null)
         {
             OnHistoryChanged?.Invoke(this, new NewClipItemEventEventArgs() { ClipItem = newClip, PreviousClipItem = previousClip });
         }
 
         private void LoadHistory()
         {
-            if (File.Exists(LocalDataJsonClipsFile))
+            if (File.Exists(this.LocalDataJsonClipsFile))
             {
-                Clips = LoadFromLocalDataJson();
+                this.Clips = this.LoadFromLocalDataJson();
             }
             else
             {
-                Clips = new List<ClipItem>();
-                Save();
+                this.Clips = new List<ClipItem>();
+                this.Save();
             }
         }
 
-        private List<ClipItem> LoadFromLocalDataJson() => LoadFromJsonCore(LocalDataJsonClipsFile);
+        private List<ClipItem> LoadFromLocalDataJson() => LoadFromJsonCore(this.LocalDataJsonClipsFile);
 
         private static List<ClipItem> LoadFromJsonCore(string jsonFilePath)
         {
@@ -148,9 +151,9 @@
                 {
                     try
                     {
-                        return JsonSerializer.Deserialize<List<ClipItem>>(content);
+                        return JsonConvert.DeserializeObject<List<ClipItem>>(content);
                     }
-                    catch (Exception) { }
+                    catch (JsonException) { }
                 }
             }
 
@@ -159,9 +162,9 @@
 
         private void Save()
         {
-            using (var writer = new StreamWriter(LocalDataJsonClipsFile))
+            using (var writer = new StreamWriter(this.LocalDataJsonClipsFile))
             {
-                string json = JsonSerializer.Serialize<List<ClipItem>>(Clips, new JsonSerializerOptions() { WriteIndented = true });
+                string json = JsonConvert.SerializeObject(this.Clips, Formatting.Indented);
                 writer.Write(json);
             }
         }

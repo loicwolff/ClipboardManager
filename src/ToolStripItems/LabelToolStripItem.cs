@@ -7,10 +7,12 @@
     {
         public LabelToolStripItem(string text) : base(new Label())
         {
-            var label = this.Control as Label;
-            label.Text = text;
-            label.BackColor = Color.Transparent;
-            label.ForeColor = Color.Gray;
+            if (this.Control is Label label)
+            {
+                label.Text = text;
+                label.BackColor = Color.Transparent;
+                label.ForeColor = Color.Gray;
+            }
         }
     }
 }

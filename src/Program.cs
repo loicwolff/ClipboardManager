@@ -1,7 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace ClipboardManager
@@ -17,7 +14,10 @@ namespace ClipboardManager
             Application.SetHighDpiMode(HighDpiMode.SystemAware);
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new TaskbarApplication());
+
+            using var app = new TaskbarApplication();
+
+            Application.Run(app);
         }
     }
 }

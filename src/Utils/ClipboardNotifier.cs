@@ -14,13 +14,13 @@
         /// <summary>
         /// Occurs when the contents of the clipboard is updated.
         /// </summary>
-        public static event ClipboardEventHandler ClipboardUpdate;
+        public static event ClipboardEventHandler? ClipboardUpdate;
 
-        public delegate void ClipboardEventHandler(object sender, ClipboardEventArgs e);
+        public delegate void ClipboardEventHandler(object? sender, ClipboardEventArgs e);
 
         private static int LastEventTimeStamp;
 
-        public static NotificationForm _form = new NotificationForm();
+        internal static NotificationForm _form = new NotificationForm();
 
         /// <summary>
         /// Raises the <see cref="ClipboardUpdate"/> event.
@@ -31,13 +31,13 @@
         /// <summary>
         /// Hidden form to recieve the WM_CLIPBOARDUPDATE message.
         /// </summary>
-        public class NotificationForm : Form
+        internal class NotificationForm : Form
         {
             public NotificationForm()
             {
-                NativeMethods.SetParent(Handle, NativeMethods.HWND_MESSAGE);
+                NativeMethods.SetParent(this.Handle, NativeMethods.HWND_MESSAGE);
 
-                NativeMethods.AddClipboardFormatListener(Handle);
+                NativeMethods.AddClipboardFormatListener(this.Handle);
             }
 
             protected override void WndProc(ref Message m)
@@ -48,7 +48,7 @@
 
                     LastEventTimeStamp = Environment.TickCount;
 
-                    OnClipboardUpdate(new ClipboardEventArgs() { ClipItem = new ClipItem() { Text = clipboard } });
+                    OnClipboardUpdate(new ClipboardEventArgs(new ClipItem(clipboard)));
                 }
 
                 base.WndProc(ref m);
@@ -58,6 +58,11 @@
 
     public class ClipboardEventArgs : EventArgs
     {
+        public ClipboardEventArgs(ClipItem clipItem)
+        {
+            this.ClipItem = clipItem;
+        }
+
         public ClipItem ClipItem { get; set; }
     }
 }

@@ -1,14 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace ClipboardManager
 {
-    class ImageToolStripItem : ToolStripControlHost
+    internal class ImageToolStripItem : ToolStripControlHost
     {
         public event ImageToolStripEventHandler ImageClicked;
 
@@ -18,36 +14,30 @@ namespace ClipboardManager
 
         public ImageToolStripItem(Image image, ImageToolStripEventHandler eventHandler) : base(new Panel())
         {
-            this.Click += OnClick;
+            this.Click += this.OnClick;
 
             ImageClicked = eventHandler;
 
-            Background = image;
+            this.Background = image;
 
             this.MainPanel = this.Control as Panel;
-            MainPanel.BackgroundImage = image;
-            MainPanel.BackgroundImageLayout = ImageLayout.Zoom;
-            MainPanel.BorderStyle = BorderStyle.FixedSingle;
-            MainPanel.BackColor = Color.Transparent;
-            MainPanel.AutoSize = false;
-            MainPanel.Size = new System.Drawing.Size(200, 75);
-            MainPanel.MinimumSize = MainPanel.Size;
+            this.MainPanel.BackgroundImage = image;
+            this.MainPanel.BackgroundImageLayout = ImageLayout.Zoom;
+            this.MainPanel.BorderStyle = BorderStyle.FixedSingle;
+            this.MainPanel.BackColor = Color.Transparent;
+            this.MainPanel.AutoSize = false;
+            this.MainPanel.Size = new System.Drawing.Size(200, 75);
+            this.MainPanel.MinimumSize = this.MainPanel.Size;
         }
 
-        void OnClick(object sender, EventArgs e)
+        void OnClick(object? sender, EventArgs e)
         {
-            if (ImageClicked != null)
-            {
-                ImageClicked(this, new ImageToolStripEventArgs(Background));
-            }
+            ImageClicked?.Invoke(this, new ImageToolStripEventArgs(this.Background));
         }
 
         void MainPanel_Click(object sender, EventArgs e)
         {
-            if (ImageClicked != null)
-            {
-                ImageClicked(this, new ImageToolStripEventArgs(Background));
-            }
+            ImageClicked?.Invoke(this, new ImageToolStripEventArgs(this.Background));
         }
     }
 
@@ -59,7 +49,7 @@ namespace ClipboardManager
 
         public ImageToolStripEventArgs(Image image)
         {
-            Image = image;
+            this.Image = image;
         }
     }
 }

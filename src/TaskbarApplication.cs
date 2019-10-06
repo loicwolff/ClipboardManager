@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Drawing;
+    using System.Globalization;
     using System.IO;
     using System.Linq;
     using System.Reflection;
@@ -33,19 +34,18 @@
 
         #region Variables
 
-        public event EventHandler CloseNotifications;
+        public event EventHandler? CloseNotifications;
 
         private const int EllipsisLength = 30;
-        private const int MaxClipCount = 30;
 
         private readonly Icon mainIcon = Icon.FromHandle(Resources.clip_white.GetHicon());
         private readonly Icon disabledIcon = Icon.FromHandle(Resources.clip_disabled.GetHicon());
 
-        private readonly Lazy<Configuration> configuration = new Lazy<Configuration>(() => Configuration.Load());
+        private readonly Lazy<AppConfiguration> configuration = new Lazy<AppConfiguration>(() => AppConfiguration.Load());
 
-        private IReadOnlyList<ClipboardRule> ClipboardRules { get; set; }
+        private IReadOnlyCollection<RuleResult> ClipboardRules { get; set; }
 
-        private KeyboardHook KeyboardHook { get; set; }
+        //private KeyboardHook KeyboardHook { get; set; }
 
         private NotifyIcon TrayIcon { get; set; }
 
@@ -62,14 +62,14 @@
             {
                 lock (clipsLock)
                 {
-                    return clipboardHistory;
+                    return this.clipboardHistory;
                 }
             }
         }
 
-        private Configuration Configuration => configuration.Value;
+        private AppConfiguration Configuration => this.configuration.Value;
 
-        public Icon DisabledIcon => disabledIcon;
+        public Icon DisabledIcon => this.disabledIcon;
 
         #endregion
 
@@ -77,7 +77,7 @@
 
         public TaskbarApplication()
         {
-            TrayIcon = new NotifyIcon()
+            this.TrayIcon = new NotifyIcon()
             {
                 Icon = mainIcon,
                 Visible = true,
@@ -85,88 +85,96 @@
                 Text = "Clipboard Manager",
             };
 
-            TrayIcon.ContextMenuStrip.RenderMode = ToolStripRenderMode.System;
+            this.TrayIcon.ContextMenuStrip.RenderMode = ToolStripRenderMode.System;
 
             // add left click to the systray icon
             // source: https://stackoverflow.com/a/3581311/12008
-            TrayIcon.MouseClick += (sender, mouseEvent) =>
+            this.TrayIcon.MouseClick += (sender, mouseEvent) =>
             {
                 if (mouseEvent.Button == MouseButtons.Left)
                 {
-                    MethodInfo mi = typeof(NotifyIcon).GetMethod("ShowContextMenu", BindingFlags.Instance | BindingFlags.NonPublic);
-                    mi?.Invoke(TrayIcon, null);
+                    var methodInfo = typeof(NotifyIcon).GetMethod("ShowContextMenu", BindingFlags.Instance | BindingFlags.NonPublic);
+                    methodInfo?.Invoke(this.TrayIcon, null);
                 }
             };
 
-            KeyboardHook = new KeyboardHook();
+            //KeyboardHook = new KeyboardHook();
 
-            try
-            {
-                KeyboardHook.RegisterHotkey(ModifierKeys.Win | ModifierKeys.Shift, Keys.C);
-            }
-            catch (Exception)
-            {
-                //Trace.TraceWarning("Cannot register Win + Shift + C");
-            }
+            //try
+            //{
+            //    KeyboardHook.RegisterHotkey(ModifierKeys.Win | ModifierKeys.Shift, Keys.C);
+            //}
+            //catch (Exception)
+            //{
+            //    //Trace.TraceWarning("Cannot register Win + Shift + C");
+            //}
 
-            try
-            {
-                KeyboardHook.RegisterHotkey(ModifierKeys.Win | ModifierKeys.Shift, Keys.W);
-            }
-            catch (Exception)
-            {
-                //Trace.TraceWarning("Cannot register Win + Shift + W");
-            }
+            //try
+            //{
+            //    KeyboardHook.RegisterHotkey(ModifierKeys.Win | ModifierKeys.Shift, Keys.W);
+            //}
+            //catch (Exception)
+            //{
+            //    //Trace.TraceWarning("Cannot register Win + Shift + W");
+            //}
 
-            try
-            {
-                KeyboardHook.RegisterHotkey(ModifierKeys.Win | ModifierKeys.Shift, Keys.X);
-            }
-            catch (Exception)
-            {
-                //Trace.TraceWarning("Cannot register Win + Shift + X");
-            }
+            //try
+            //{
+            //    KeyboardHook.RegisterHotkey(ModifierKeys.Win | ModifierKeys.Shift, Keys.X);
+            //}
+            //catch (Exception)
+            //{
+            //    //Trace.TraceWarning("Cannot register Win + Shift + X");
+            //}
 
-            try
-            {
-                KeyboardHook.RegisterHotkey(ModifierKeys.Win | ModifierKeys.Shift, Keys.D);
-            }
-            catch (Exception)
-            {
-                //Trace.TraceWarning("Cannot register Win + Shift + D");
-            }
+            //try
+            //{
+            //    KeyboardHook.RegisterHotkey(ModifierKeys.Win | ModifierKeys.Shift, Keys.D);
+            //}
+            //catch (Exception)
+            //{
+            //    //Trace.TraceWarning("Cannot register Win + Shift + D");
+            //}
 
-            KeyboardHook.KeyPressed += KeyboardHook_KeyPressed;
+            //KeyboardHook.KeyPressed += KeyboardHook_KeyPressed;
 
-            ClipboardHistory.OnHistoryChanged += OnClipboardHistoryChanged;
+            this.ClipboardHistory.OnHistoryChanged += this.OnClipboardHistoryChanged;
 
-            ClipboardRules = ClipboardRule.GetMatchingRules(ClipboardHistory.CurrentClip.Text).ToList();
+            this.ClipboardRules = ClipboardRule.GetMatchingRules(this.ClipboardHistory.CurrentClip.Text).ToList();
 
-            DrawMenuItems();
+            this.DrawMenuItems();
         }
 
         #endregion
+
+        protected override void Dispose(bool disposing)
+        {
+            base.Dispose(disposing);
+
+            this.mainIcon.Dispose();
+            this.disabledIcon.Dispose();
+        }
 
         #region Systray menu
 
         private void AddClipboardHistory()
         {
-            foreach (ClipItem clip in ClipboardHistory)
+            foreach (ClipItem clip in this.ClipboardHistory)
             {
                 var (label, length) = Ellipsis(clip.Text);
-                bool isInClipboard = clip == ClipboardHistory.CurrentClip;
+                bool isInClipboard = clip == this.ClipboardHistory.CurrentClip;
 
                 var trayIconMenuItem = new ToolStripMenuItem(label)
                 {
                     ShortcutKeyDisplayString = length,
-                    Enabled = ClipboardHistory.SavingEnabled,
+                    Enabled = this.ClipboardHistory.SavingEnabled,
                     Font = new Font(SystemFonts.MenuFont, isInClipboard ? FontStyle.Bold : FontStyle.Regular),
                 };
-                trayIconMenuItem.Click += (object sender, EventArgs e) =>
+                trayIconMenuItem.Click += (object? sender, EventArgs e) =>
                 {
                     if (Control.ModifierKeys == Keys.Shift)
                     {
-                        ClipboardHistory.RemoveAll(clip);
+                        this.ClipboardHistory.RemoveAll(clip);
                     }
                     else
                     {
@@ -174,12 +182,12 @@
                     }
                 };
 
-                TrayIcon.ContextMenuStrip.Items.Add(trayIconMenuItem);
+                this.TrayIcon.ContextMenuStrip.Items.Add(trayIconMenuItem);
             }
 
             if (this.ClipboardHistory.CurrentClip.IsEmpty)
             {
-                TrayIcon.ContextMenuStrip.Items.Add(new ToolStripMenuItem("Clipboard is empty")
+                this.TrayIcon.ContextMenuStrip.Items.Add(new ToolStripMenuItem("Clipboard is empty")
                 {
                     Enabled = false,
                 });
@@ -188,54 +196,54 @@
 
         private void AddClipboardRules()
         {
-            if (ClipboardRules != null && ClipboardRules.Any())
+            if (this.ClipboardRules != null && this.ClipboardRules.Any())
             {
-                var actions = ClipboardRules.SelectMany(r => r.QuickActions);
+                var actions = this.ClipboardRules.SelectMany(r => r.QuickActions);
 
                 int width = actions.Max(a => TextRenderer.MeasureText(a.OpenLabel, SystemFonts.DefaultFont).Width);
 
-                TrayIcon.ContextMenuStrip.Items.Add(new ToolStripSeparator());
-                TrayIcon.ContextMenuStrip.Items.Add(new LabelToolStripItem("Quick Actions"));
+                this.TrayIcon.ContextMenuStrip.Items.Add(new ToolStripSeparator());
+                this.TrayIcon.ContextMenuStrip.Items.Add(new LabelToolStripItem("Quick Actions"));
 
-                foreach (ClipboardRule rule in ClipboardRules)
+                foreach (var ruleResult in this.ClipboardRules)
                 {
-                    var quickActionMenuItem = new QuickActionToolStripItem(rule, width);
-                    quickActionMenuItem.ItemClicked += (object sender, EventArgs e) =>
+                    var quickActionMenuItem = new QuickActionToolStripItem(ruleResult, width);
+                    quickActionMenuItem.ItemClicked += (object? sender, EventArgs e) =>
                     {
-                        TrayIcon.ContextMenuStrip.Close(ToolStripDropDownCloseReason.ItemClicked);
+                        this.TrayIcon.ContextMenuStrip.Close(ToolStripDropDownCloseReason.ItemClicked);
                     };
-                    quickActionMenuItem.CopyItemClicked += (object sender, EventArgs e) =>
+                    quickActionMenuItem.CopyItemClicked += (object? sender, EventArgs e) =>
                     {
-                        TrayIcon.ContextMenuStrip.Close(ToolStripDropDownCloseReason.ItemClicked);
+                        this.TrayIcon.ContextMenuStrip.Close(ToolStripDropDownCloseReason.ItemClicked);
                     };
 
-                    TrayIcon.ContextMenuStrip.Items.Add(quickActionMenuItem);
+                    this.TrayIcon.ContextMenuStrip.Items.Add(quickActionMenuItem);
                 }
             }
         }
 
         private void DrawMenuItems()
         {
-            TrayIcon.ContextMenuStrip.Items.Clear();
+            this.TrayIcon.ContextMenuStrip.Items.Clear();
 
-            TrayIcon.ContextMenuStrip.Items.Add(GetOptionsMenuItem());
+            this.TrayIcon.ContextMenuStrip.Items.Add(this.GetOptionsMenuItem());
 
-            if (ClipboardHistory.Any())
+            if (this.ClipboardHistory.Any())
             {
-                TrayIcon.ContextMenuStrip.Items.Add(new ToolStripSeparator());
+                this.TrayIcon.ContextMenuStrip.Items.Add(new ToolStripSeparator());
             }
 
             this.AddClipboardHistory();
 
             this.AddClipboardRules();
 
-            if (!ClipboardHistory.SavingEnabled)
+            if (!this.ClipboardHistory.SavingEnabled)
             {
-                TrayIcon.ContextMenuStrip.Items.Add(new ToolStripSeparator());
+                this.TrayIcon.ContextMenuStrip.Items.Add(new ToolStripSeparator());
 
-                TrayIcon.ContextMenuStrip.Items.Add(new ToolStripMenuItem("Saving Disabled") { Enabled = false });
+                this.TrayIcon.ContextMenuStrip.Items.Add(new ToolStripMenuItem("Saving Disabled") { Enabled = false });
 
-                TrayIcon.ContextMenuStrip.Items.Add(new ToolStripMenuItem("Enable Clipboard Monitoring", null, ToggleSaving));
+                this.TrayIcon.ContextMenuStrip.Items.Add(new ToolStripMenuItem("Enable Clipboard Monitoring", null, this.ToggleSaving));
             }
         }
 
@@ -243,19 +251,19 @@
         {
             var menuItem = new ToolStripMenuItem("Options");
 
-            menuItem.DropDownItems.Add(new ToolStripMenuItem("Show Quick Actions Notifications", null, ToggleHUD) { Checked = Configuration.ShowHUD, ToolTipText = "Show notification if a special pattern is recognized" });
+            menuItem.DropDownItems.Add(new ToolStripMenuItem("Show Quick Actions Notifications", null, this.ToggleHUD) { Checked = this.Configuration.ShowHUD, ToolTipText = "Show notification if a special pattern is recognized" });
 
-            if (Configuration.ShowHUD)
+            if (this.Configuration.ShowHUD)
             {
-                menuItem.DropDownItems.Add(new ToolStripMenuItem("Limit Notification Count", null, ToggleLimitNotification) { Checked = Configuration.LimitNotificationCount });
+                menuItem.DropDownItems.Add(new ToolStripMenuItem("Limit Notification Count", null, this.ToggleLimitNotification) { Checked = this.Configuration.LimitNotificationCount });
 
-                if (Configuration.LimitNotificationCount)
+                if (this.Configuration.LimitNotificationCount)
                 {
-                    var notificationCountItem = new NotificationCountToolStripItem(Configuration.MaxNotificationCount) { Enabled = Configuration.ShowHUD };
+                    var notificationCountItem = new NotificationCountToolStripItem(this.Configuration.MaxNotificationCount) { Enabled = this.Configuration.ShowHUD };
                     notificationCountItem.ValueChanged += (object sender, NotificationCountEventArgs e) =>
                     {
-                        Configuration.MaxNotificationCount = e.NotificationCount;
-                        Configuration.Save();
+                        this.Configuration.MaxNotificationCount = e.NotificationCount;
+                        this.Configuration.Save();
 
                         this.TrayIcon.ContextMenuStrip.Close();
                     };
@@ -265,54 +273,54 @@
 
             menuItem.DropDownItems.Add(new ToolStripSeparator());
 
-            menuItem.DropDownItems.Add(new ToolStripMenuItem("Empty Clipboard History", null, (object sender, EventArgs e) => RemoveAllClips()));
+            menuItem.DropDownItems.Add(new ToolStripMenuItem("Empty Clipboard History", null, (object? sender, EventArgs e) => this.RemoveAllClips()));
 
-            if (ClipboardHistory.SavingEnabled)
+            if (this.ClipboardHistory.SavingEnabled)
             {
-                menuItem.DropDownItems.Add(new ToolStripMenuItem("Disable Clipboard Monitoring", null, ToggleSaving));
+                menuItem.DropDownItems.Add(new ToolStripMenuItem("Disable Clipboard Monitoring", null, this.ToggleSaving));
             }
 
             menuItem.DropDownItems.Add(new ToolStripSeparator());
 
-            menuItem.DropDownItems.Add(new ToolStripMenuItem("Exit", null, Exit));
+            menuItem.DropDownItems.Add(new ToolStripMenuItem("Exit", null, this.Exit));
 
             return menuItem;
         }
 
-        private void Exit(object sender, EventArgs e)
+        private void Exit(object? sender, EventArgs e)
         {
             if (MessageBox.Show("Quit Clipboard Manager?\nYour clipboard will no longer be saved.", "Clipboard Manager", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2) == DialogResult.Yes)
             {
                 // Hide tray icon, otherwise it will remain shown until user mouses over it
-                TrayIcon.Visible = false;
+                this.TrayIcon.Visible = false;
 
                 Application.Exit();
             }
         }
 
-        private void ToggleSaving(object sender, EventArgs e)
+        private void ToggleSaving(object? sender, EventArgs e)
         {
-            ClipboardHistory.ToggleSavingEnabled();
+            this.ClipboardHistory.ToggleSavingEnabled();
 
-            this.TrayIcon.Icon = ClipboardHistory.SavingEnabled ? this.mainIcon : this.DisabledIcon;
+            this.TrayIcon.Icon = this.ClipboardHistory.SavingEnabled ? this.mainIcon : this.DisabledIcon;
 
-            DrawMenuItems();
+            this.DrawMenuItems();
         }
 
-        private void ToggleHUD(object sender, EventArgs e)
+        private void ToggleHUD(object? sender, EventArgs e)
         {
-            Configuration.ShowHUD = !Configuration.ShowHUD;
-            Configuration.Save();
+            this.Configuration.ShowHUD = !this.Configuration.ShowHUD;
+            this.Configuration.Save();
 
-            DrawMenuItems();
+            this.DrawMenuItems();
         }
 
-        private void ToggleLimitNotification(object sender, EventArgs e)
+        private void ToggleLimitNotification(object? sender, EventArgs e)
         {
-            Configuration.LimitNotificationCount = !Configuration.LimitNotificationCount;
-            Configuration.Save();
+            this.Configuration.LimitNotificationCount = !this.Configuration.LimitNotificationCount;
+            this.Configuration.Save();
 
-            DrawMenuItems();
+            this.DrawMenuItems();
         }
 
         private void RemoveAllClips()
@@ -323,7 +331,7 @@
                 MessageBoxDefaultButton.Button2,
                 MessageBoxOptions.DefaultDesktopOnly) == DialogResult.Yes)
             {
-                ClipboardHistory.Clear();
+                this.ClipboardHistory.Clear();
             }
         }
 
@@ -333,22 +341,22 @@
 
         public void ShowNotifications()
         {
-            if (Configuration.ShowHUD && ClipboardRules != null && ClipboardRules.Any())
+            if (this.Configuration.ShowHUD && this.ClipboardRules != null && this.ClipboardRules.Any())
             {
-                SendCloseNotificationsEvent();
+                this.SendCloseNotificationsEvent();
 
                 int index = 0;
                 int startPosY = Screen.PrimaryScreen.WorkingArea.Height;
 
-                foreach (var rule in ClipboardRules)
+                foreach (var rule in this.ClipboardRules)
                 {
                     var actions = from action in rule.QuickActions
                                   where action.IsEnabled
                                   select action;
 
-                    if (Configuration.LimitNotificationCount)
+                    if (this.Configuration.LimitNotificationCount)
                     {
-                        actions = actions.Take(Configuration.MaxNotificationCount - index).AsQueryable();
+                        actions = actions.Take(this.Configuration.MaxNotificationCount - index).AsQueryable();
                     }
 
                     foreach (var quickAction in actions)
@@ -358,11 +366,11 @@
 
                         notification.OpenClick += (object sender, MouseEventArgs e) =>
                         {
-                            quickAction.Start(rule.Values);
+                            quickAction.Run(rule.Values);
 
                             if (actions.Count() == 1)
                             {
-                                SendCloseNotificationsEvent();
+                                this.SendCloseNotificationsEvent();
                             }
                         };
 
@@ -372,13 +380,13 @@
 
                             if (actions.Count() == 1)
                             {
-                                SendCloseNotificationsEvent();
+                                this.SendCloseNotificationsEvent();
                             }
                         };
 
                         notification.RightClick += (object sender, MouseEventArgs e) =>
                         {
-                            SendCloseNotificationsEvent();
+                            this.SendCloseNotificationsEvent();
                         };
 
                         notification.ShowInactiveTopmost();
@@ -390,7 +398,7 @@
 
                     titleNotification.RightClick += (object sender, MouseEventArgs e) =>
                     {
-                        SendCloseNotificationsEvent();
+                        this.SendCloseNotificationsEvent();
                     };
                     titleNotification.ShowInactiveTopmost();
                     titleNotification.FadeIn();
@@ -403,9 +411,9 @@
             CloseNotifications?.Invoke(this, EventArgs.Empty);
         }
 
-        private QuickAction GetFirstQuickAction(bool copyOnly, out IReadOnlyCollection<string> urlValues)
+        private QuickAction? GetFirstQuickAction(bool copyOnly, out string[] urlValues)
         {
-            var rule = ClipboardRules.FirstOrDefault();
+            var rule = this.ClipboardRules.FirstOrDefault();
             if (rule != null)
             {
                 urlValues = rule.Values.ToArray();
@@ -422,26 +430,26 @@
                 return firstAction;
             }
 
-            urlValues = null;
+            urlValues = Array.Empty<string>();
             return null;
         }
 
         private void CopyFirstLink()
         {
-            var action = GetFirstQuickAction(true, out var urlValues);
+            var action = this.GetFirstQuickAction(true, out var urlValues);
 
             if (action != null)
             {
-                SendCloseNotificationsEvent();
+                this.SendCloseNotificationsEvent();
 
                 action.Copy(urlValues);
 
-                var titleNotification = new NotificationForm(this, String.Format("{0} link copied", action.Name));
+                var titleNotification = new NotificationForm(this, String.Format(CultureInfo.CurrentCulture, "{0} link copied", action.Name));
                 titleNotification.StartPosY = Screen.PrimaryScreen.WorkingArea.Height - (titleNotification.Height + 5);
 
                 titleNotification.RightClick += (object sender, MouseEventArgs e) =>
                 {
-                    SendCloseNotificationsEvent();
+                    this.SendCloseNotificationsEvent();
                 };
                 titleNotification.ShowInactiveTopmost();
                 titleNotification.FadeIn();
@@ -451,58 +459,58 @@
 
         private void OpenFirstAction()
         {
-            var action = GetFirstQuickAction(true, out var urlValues);
+            var action = this.GetFirstQuickAction(true, out var urlValues);
 
-            action?.Start(urlValues);
+            action?.Run(urlValues);
         }
 
         #endregion
 
-        void OnClipboardHistoryChanged(object sender, NewClipItemEventEventArgs e)
+        void OnClipboardHistoryChanged(object? sender, NewClipItemEventEventArgs e)
         {
-            ClipboardRules = ClipboardRule.GetMatchingRules(e.ClipItem.Text).ToList();
+            this.ClipboardRules = ClipboardRule.GetMatchingRules(e.ClipItem.Text).ToList();
 
             if (e.ClipItem != ClipItem.Empty && e.ClipItem != e.PreviousClipItem)
             {
-                ShowNotifications();
+                this.ShowNotifications();
             }
 
-            DrawMenuItems();
+            this.DrawMenuItems();
         }
 
-        void KeyboardHook_KeyPressed(object sender, KeyPressedEventArgs e)
+        void KeyboardHook_KeyPressed(object? sender, KeyPressedEventArgs e)
         {
             if (e.Modifier == (ModifierKeys.Win | ModifierKeys.Shift) && e.Key == Keys.C)
             {
-                Clipboard.SetText(ClipboardHistory.CurrentClip.Text);
+                Clipboard.SetText(this.ClipboardHistory.CurrentClip.Text);
             }
             else if (e.Modifier == (ModifierKeys.Win | ModifierKeys.Shift) && e.Key == Keys.W)
             {
-                ShowNotifications();
+                this.ShowNotifications();
             }
             else if (e.Modifier == (ModifierKeys.Win | ModifierKeys.Shift) && e.Key == Keys.X)
             {
-                CopyFirstLink();
+                this.CopyFirstLink();
             }
             else if (e.Modifier == (ModifierKeys.Win | ModifierKeys.Shift) && e.Key == Keys.D)
             {
-                OpenFirstAction();
+                this.OpenFirstAction();
             }
         }
 
-        private static (string, string) Ellipsis(string label)
+        private static (string, string) Ellipsis(string? label)
         {
             if (String.IsNullOrWhiteSpace(label))
             {
-                return (label, String.Empty);
+                return (string.Empty, string.Empty);
             }
 
-            label = Regex.Replace(label, @"([\r\n]+|\t+|\s+)", " ").Replace("&", "&&").Trim();
+            label = Regex.Replace(label, @"([\r\n]+|\t+|\s+)", " ").Replace("&", "&&", StringComparison.InvariantCulture).Trim();
 
             if (label.Length > EllipsisLength + 1)
             {
                 return (String.Concat(label.Substring(0, EllipsisLength).TrimEnd(), "…").PadRight(EllipsisLength + 5),
-                        String.Format("[{0:N0}c]", label.Length));
+                        String.Format(CultureInfo.InvariantCulture, "[{0:N0}c]", label.Length));
             }
             else
             {

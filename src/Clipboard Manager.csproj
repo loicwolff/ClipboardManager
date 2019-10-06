@@ -1,54 +1,70 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
 
-  <PropertyGroup>
-    <OutputType>WinExe</OutputType>
-    <TargetFramework>netcoreapp3.0</TargetFramework>
-    <RootNamespace>ClipboardManager</RootNamespace>
-    <UseWindowsForms>true</UseWindowsForms>
-    <AssemblyName>ClipboardManager</AssemblyName>
-    <ApplicationIcon>clip.ico</ApplicationIcon>
-    <Win32Resource />
-    <Authors>Loïc Wolff</Authors>
-    <Product>Clipboard Manager</Product>
-    <Description>Simple systray clipboard manager with custom content rules</Description>
-    <RepositoryUrl>https://github.com/loicwolff/ClipboardManager</RepositoryUrl>
-    <RepositoryType>Git</RepositoryType>
-    <NeutralLanguage>en</NeutralLanguage>
-  </PropertyGroup>
+    <PropertyGroup>
+        <OutputType>WinExe</OutputType>
+        <TargetFramework>netcoreapp3.0</TargetFramework>
+        <RootNamespace>ClipboardManager</RootNamespace>
+        <UseWindowsForms>true</UseWindowsForms>
+        <AssemblyName>ClipboardManager</AssemblyName>
+        <ApplicationIcon>clip.ico</ApplicationIcon>
+        <Win32Resource />
+        <Authors>Loïc Wolff</Authors>
+        <Product>Clipboard Manager</Product>
+        <Description>Simple systray clipboard manager with custom content rules</Description>
+        <RepositoryUrl>https://github.com/loicwolff/ClipboardManager</RepositoryUrl>
+        <RepositoryType>Git</RepositoryType>
+        <NeutralLanguage>en</NeutralLanguage>
+        <LangVersion>latest</LangVersion>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <Content Include="Resources\clip.ico" />
-  </ItemGroup>
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+        <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+        <WarningsAsErrors />
+        <NoWarn />
+    </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="System.Text.Json" Version="4.6.0" />
-  </ItemGroup>
+    <ItemGroup>
+      <Compile Remove="ToolStripItems\ImageToolStripItem.cs" />
+    </ItemGroup>
 
-  <ItemGroup>
-    <Compile Update="NonSelectableButton.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Update="Resources.Designer.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
-    <Compile Update="ToolStripItems\LabelToolStripItem.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Update="ToolStripItems\NotificationCountToolStripItem.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Update="ToolStripItems\QuickActionToolStripItem.cs">
-      <SubType>Component</SubType>
-    </Compile>
-  </ItemGroup>
+    <ItemGroup>
+        <Content Include="Resources\clip.ico" />
+    </ItemGroup>
 
-  <ItemGroup>
-    <EmbeddedResource Update="Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-  </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.9.6">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Compile Update="NonSelectableButton.cs">
+            <SubType>Component</SubType>
+        </Compile>
+        <Compile Update="Resources.Designer.cs">
+            <DesignTime>True</DesignTime>
+            <AutoGen>True</AutoGen>
+            <DependentUpon>Resources.resx</DependentUpon>
+        </Compile>
+        <Compile Update="ToolStripItems\LabelToolStripItem.cs">
+            <SubType>Component</SubType>
+        </Compile>
+        <Compile Update="ToolStripItems\NotificationCountToolStripItem.cs">
+            <SubType>Component</SubType>
+        </Compile>
+        <Compile Update="ToolStripItems\QuickActionToolStripItem.cs">
+            <SubType>Component</SubType>
+        </Compile>
+    </ItemGroup>
+
+    <ItemGroup>
+        <EmbeddedResource Update="Resources.resx">
+            <Generator>ResXFileCodeGenerator</Generator>
+            <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+        </EmbeddedResource>
+    </ItemGroup>
 
 </Project>

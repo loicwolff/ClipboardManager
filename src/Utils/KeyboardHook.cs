@@ -11,9 +11,9 @@
         /// <summary>
         /// Represents the window that is used internally to get the messages.
         /// </summary>
-        public sealed class Window : NativeWindow, IDisposable
+        internal sealed class Window : NativeWindow, IDisposable
         {
-            private static readonly int WM_HOTKEY = 0x0312;
+            private const int WM_HOTKEY = 0x0312;
 
             public Window()
             {
@@ -41,7 +41,7 @@
                 }
             }
 
-            public event EventHandler<KeyPressedEventArgs> KeyPressed;
+            public event EventHandler<KeyPressedEventArgs>? KeyPressed;
 
             #region IDisposable Members
 
@@ -57,7 +57,10 @@
         private int _currentId;
 
         // register the event of the inner native window.
-        public KeyboardHook() => _window.KeyPressed += (object sender, KeyPressedEventArgs args) => KeyPressed?.Invoke(this, args);
+        public KeyboardHook()
+        {
+            this._window.KeyPressed += (object? sender, KeyPressedEventArgs args) => KeyPressed?.Invoke(this, args);
+        }
 
         /// <summary>
         /// Registers a hot key in the system.
@@ -67,27 +70,27 @@
         public void RegisterHotkey(ModifierKeys modifier, Keys key)
         {
             // register the hot key.
-            if (!NativeMethods.RegisterHotKey(_window.Handle, ++_currentId, (uint)modifier, (uint)key))
+            if (!NativeMethods.RegisterHotKey(this._window.Handle, ++this._currentId, (uint)modifier, (uint)key))
                 throw new InvalidOperationException("Couldn’t register the hot key.");
         }
 
         /// <summary>
         /// A hot key has been pressed.
         /// </summary>
-        public event EventHandler<KeyPressedEventArgs> KeyPressed;
+        public event EventHandler<KeyPressedEventArgs>? KeyPressed;
 
         #region IDisposable Members
 
         public void Dispose()
         {
             // unregister all the registered hot keys.
-            for (int i = _currentId; i > 0; i--)
+            for (int i = this._currentId; i > 0; i--)
             {
-                NativeMethods.UnregisterHotKey(_window.Handle, i);
+                NativeMethods.UnregisterHotKey(this._window.Handle, i);
             }
 
             // dispose the inner native window.
-            _window.Dispose();
+            this._window.Dispose();
         }
 
         #endregion
@@ -100,8 +103,8 @@
     {
         internal KeyPressedEventArgs(ModifierKeys modifier, Keys key)
         {
-            Modifier = modifier;
-            Key = key;
+            this.Modifier = modifier;
+            this.Key = key;
         }
 
         public ModifierKeys Modifier { get; }
@@ -113,7 +116,7 @@
     /// The enumeration of possible modifiers.
     /// </summary>
     [Flags]
-    public enum ModifierKeys : uint
+    public enum ModifierKeys : int
     {
         Alt = 1,
         Control = 2,

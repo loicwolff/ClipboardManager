@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Text;
+using System.Globalization;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -11,103 +8,109 @@ namespace ClipboardManager
 {
     public partial class NotificationForm : Form
     {
-        public event MouseEventHandler OpenClick;
-        public event MouseEventHandler CopyLinkClick;
-        public event MouseEventHandler RightClick;
+        public event MouseEventHandler? OpenClick;
+        public event MouseEventHandler? CopyLinkClick;
+        public event MouseEventHandler? RightClick;
 
         private const int SW_SHOWNOACTIVATE = 4;
         private const int HWND_TOPMOST = -1;
         private const uint SWP_NOACTIVATE = 0x0010;
 
-        private Timer fadeoutTimer;
+        private readonly Timer fadeoutTimer;
 
         private bool fadingIn = false;
-
-        public string ApplicationName { get; set; }
-
-        public string QuickActionValue { get; set; }
 
         public bool NotificationClosing { get; set; }
 
         public TaskbarApplication App { get; set; }
 
-        /// <summary>
-        /// Constructeur de base
-        /// </summary>
-        /// <param name="app">L'application parent</param>
         public NotificationForm(TaskbarApplication app)
         {
-            InitializeComponent();
+            this.InitializeComponent();
 
-            App = app;
+            this.App = app;
 
-            fadeoutTimer = new Timer
+            this.fadeoutTimer = new Timer
             {
                 Interval = 4000
             };
-            fadeoutTimer.Tick += OnTimerTick;
+            this.fadeoutTimer.Tick += this.OnTimerTick;
 
-            NotificationClosing = false;
+            this.NotificationClosing = false;
 
-            App.CloseNotifications += OnParentCloseNotifications;
+            if (this.App != null)
+                this.App.CloseNotifications += this.OnParentCloseNotifications;
         }
 
-        /// <summary>
-        /// Constructeur pour affichage d'un message d'info
-        /// </summary>
-        /// <param name="app"></param>
-        /// <param name="label"></param>
         public NotificationForm(TaskbarApplication app, string label) : this(app)
         {
-            Height = 40;
+            if (string.IsNullOrWhiteSpace(label))
+            {
+                throw new ArgumentNullException(nameof(label));
+            }
 
-            CopyLinkButton.Visible = false;
-            CopyLinkButton.Enabled = false;
+            this.Height = 40;
 
-            OpenLinkButton.Padding = new Padding(0);
+            this.CopyLinkButton.Visible = false;
+            this.CopyLinkButton.Enabled = false;
 
-            OpenLinkButton.Font = new Font(OpenLinkButton.Font.FontFamily, 11, FontStyle.Bold);
+            this.OpenLinkButton.Padding = new Padding(0);
 
-            OpenLinkButton.Text = label;
+            this.OpenLinkButton.Font = new Font(this.OpenLinkButton.Font.FontFamily, 11, FontStyle.Bold);
 
-            OpenLinkButton.Dock = DockStyle.Fill;
-            OpenLinkButton.BackColor = Color.LightGray;
-            OpenLinkButton.TextAlign = ContentAlignment.MiddleCenter;
+            this.OpenLinkButton.Text = label;
 
-            OpenLinkButton.FlatAppearance.BorderColor = Color.Gray;
-            OpenLinkButton.FlatAppearance.MouseDownBackColor = Color.LightGray;
-            OpenLinkButton.FlatAppearance.MouseOverBackColor = Color.LightGray;
+            this.OpenLinkButton.Dock = DockStyle.Fill;
+            this.OpenLinkButton.BackColor = Color.LightGray;
+            this.OpenLinkButton.TextAlign = ContentAlignment.MiddleCenter;
 
-            int textWidth = TextRenderer.MeasureText(label, OpenLinkButton.Font).Width;
+            this.OpenLinkButton.FlatAppearance.BorderColor = Color.Gray;
+            this.OpenLinkButton.FlatAppearance.MouseDownBackColor = Color.LightGray;
+            this.OpenLinkButton.FlatAppearance.MouseOverBackColor = Color.LightGray;
+
+            int textWidth = TextRenderer.MeasureText(label, this.OpenLinkButton.Font).Width;
             if (textWidth > this.Width)
             {
-                OpenLinkButton.Text = String.Concat(label.Substring(0, 40), "…");
+                this.OpenLinkButton.Text = String.Concat(label.Substring(0, 40), "…");
             }
         }
 
-        /// <summary>WW
-        /// Constructeur notification launcher
-        /// </summary>
-        /// <param name="app">L'application parent</param>
-        /// <param name="quickAction">La Quick Action associée</param>
-        /// <param name="values">Les paramètres extrais</param>
         public NotificationForm(TaskbarApplication app, QuickAction quickAction) : this(app)
         {
-            OpenLinkButton.Text = quickAction.OpenLabel;
+            if (quickAction == null)
+                throw new ArgumentNullException(nameof(quickAction));
+
+            this.OpenLinkButton.Text = quickAction.OpenLabel;
 
             if (quickAction.CanCopy)
             {
-                CopyLinkButton.Text = String.Format("Copy link");
+                this.CopyLinkButton.Text = String.Format(CultureInfo.CurrentCulture, "Copy link");
             }
             else
             {
-                CopyLinkButton.Visible = false;
-                CopyLinkButton.Enabled = false;
-                OpenLinkButton.Dock = DockStyle.Fill;
+                this.CopyLinkButton.Visible = false;
+                this.CopyLinkButton.Enabled = false;
+                this.OpenLinkButton.Dock = DockStyle.Fill;
             }
         }
 
-        private void OnParentCloseNotifications(object sender, EventArgs e) => Fadeout();
+        /// <summary>
+        /// Clean up any resources being used.
+        /// </summary>
+        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing && (this.components != null))
+            {
+                this.components.Dispose();
+            }
+
+            this.fadeoutTimer.Dispose();
+
+            base.Dispose(disposing);
+        }
+
+        private void OnParentCloseNotifications(object? sender, EventArgs e) => this.Fadeout();
 
         public int StartPosY
         {
@@ -115,57 +118,57 @@ namespace ClipboardManager
             set;
         }
 
-        private void OnTimerTick(object sender, EventArgs e)
+        private void OnTimerTick(object? sender, EventArgs e)
         {
-            fadeoutTimer.Stop();
-            Fadeout();
+            this.fadeoutTimer.Stop();
+            this.Fadeout();
         }
 
         public async void FadeIn()
         {
-            fadingIn = true;
+            this.fadingIn = true;
 
             //Object is not fully invisible. Fade it in
-            while (!this.IsDisposed && this.Opacity < 1.0 && fadingIn && !NotificationClosing)
+            while (!this.IsDisposed && this.Opacity < 1.0 && this.fadingIn && !this.NotificationClosing)
             {
-                await Task.Delay(10);
-                Opacity += 0.05;
+                await Task.Delay(10).ConfigureAwait(true);
+                this.Opacity += 0.05;
             }
 
             if (!this.IsDisposed)
             {
-                Opacity = 1; //make fully visible
+                this.Opacity = 1; //make fully visible
 
-                fadingIn = false;
+                this.fadingIn = false;
 
-                fadeoutTimer.Start();
+                this.fadeoutTimer.Start();
             }
         }
 
         public async void Fadeout()
         {
-            NotificationClosing = true;
+            this.NotificationClosing = true;
 
-            fadingIn = false;
+            this.fadingIn = false;
 
             //Object is fully visible. Fade it out
             while (!this.IsDisposed && this.Opacity > 0.0)
             {
-                await Task.Delay(5);
-                Opacity -= 0.05;
+                await Task.Delay(5).ConfigureAwait(true);
+                this.Opacity -= 0.05;
             }
 
             if (!this.IsDisposed)
             {
-                Opacity = 0; //make fully invisible
-                Close();
+                this.Opacity = 0; //make fully invisible
+                this.Close();
             }
         }
 
         public void ShowInactiveTopmost()
         {
-            NativeMethods.ShowWindow(Handle, SW_SHOWNOACTIVATE);
-            NativeMethods.SetWindowPos(Handle.ToInt32(), HWND_TOPMOST, Screen.PrimaryScreen.WorkingArea.Width - Width - 10, StartPosY, this.Width, this.Height, SWP_NOACTIVATE);
+            NativeMethods.ShowWindow(this.Handle, SW_SHOWNOACTIVATE);
+            NativeMethods.SetWindowPos(this.Handle.ToInt32(), HWND_TOPMOST, Screen.PrimaryScreen.WorkingArea.Width - this.Width - 10, this.StartPosY, this.Width, this.Height, SWP_NOACTIVATE);
         }
 
         private void OnCopyLinkClick(object sender, MouseEventArgs e)
@@ -175,24 +178,24 @@ namespace ClipboardManager
                 CopyLinkClick(sender, e);
             }
 
-            Fadeout();
+            this.Fadeout();
         }
 
         private void OnMouseEnter(object sender, EventArgs e)
         {
-            if (!NotificationClosing && !fadingIn)
+            if (!this.NotificationClosing && !this.fadingIn)
             {
-                fadeoutTimer.Stop();
+                this.fadeoutTimer.Stop();
 
-                Opacity = 1;
+                this.Opacity = 1;
             }
         }
 
         private void OnMouseLeave(object sender, EventArgs e)
         {
-            if (!NotificationClosing && !fadingIn)
+            if (!this.NotificationClosing && !this.fadingIn)
             {
-                fadeoutTimer.Start();
+                this.fadeoutTimer.Start();
             }
         }
 
@@ -213,14 +216,14 @@ namespace ClipboardManager
                 CopyLinkClick(sender, e);
             }
 
-            Fadeout();
+            this.Fadeout();
         }
 
         private void OpenLinkLabel_MouseUp(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Right)
             {
-                App.CloseNotifications -= OnParentCloseNotifications;
+                this.App.CloseNotifications -= this.OnParentCloseNotifications;
 
                 RightClick?.Invoke(this, e);
             }
@@ -229,7 +232,7 @@ namespace ClipboardManager
                 OpenClick(sender, e);
             }
 
-            Fadeout();
+            this.Fadeout();
         }
     }
 }

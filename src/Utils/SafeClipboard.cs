@@ -15,10 +15,9 @@
                 {
                     string text = GetText();
 
-                    return new ClipItem
-                    {
-                        Text = String.IsNullOrWhiteSpace(text) ? String.Empty : text,
-                    };
+                    return new ClipItem(String.IsNullOrWhiteSpace(text) ?
+                        String.Empty :
+                        text);
                 }
                 else
                 {
@@ -41,7 +40,7 @@
 
         }
 
-        public static void SetText(string text)
+        public static void SetText(string? text)
         {
             if (!String.IsNullOrWhiteSpace(text))
             {
