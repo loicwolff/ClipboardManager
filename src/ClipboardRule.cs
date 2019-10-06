@@ -117,7 +117,7 @@
 
         public string Label { get; set; }
 
-        public string[] Values { get; set; }
+        public IReadOnlyCollection<string> Values { get; set; }
 
         public Regex RuleRegex { get; private set; }
 

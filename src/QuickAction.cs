@@ -1,9 +1,11 @@
 ﻿namespace ClipboardManager
 {
     using System;
+    using System.Collections.Generic;
     using System.ComponentModel;
     using System.Diagnostics;
     using System.IO;
+    using System.Linq;
     using System.Windows.Forms;
 
     using Clipboard = SafeClipboard;
@@ -46,9 +48,9 @@
         /// </summary>
         /// <param name="urlValues">Values to insert in the urls</param>
         /// <returns>Return the url formatted with the <paramref name="urlValues"/></returns>
-        protected virtual string GetFormattedUrl(string[] urlValues)
+        protected virtual string GetFormattedUrl(IEnumerable<string> urlValues)
         {
-            string url = String.Format(Url, urlValues);
+            string url = String.Format(Url, urlValues.ToArray());
 
             if (GetUrlComplement != null)
             {
@@ -62,13 +64,13 @@
         /// Method to copy the url in the clipboard
         /// </summary>
         /// <param name="urlValues">Les données extraites du presse-papier</param>
-        public virtual void Copy(string[] urlValues) => Clipboard.SetText(GetFormattedUrl(urlValues));
+        public virtual void Copy(IEnumerable<string> urlValues) => Clipboard.SetText(GetFormattedUrl(urlValues));
 
         /// <summary>
         /// Méthode pour ouvrir l'URL formattée
         /// </summary>
         /// <param name="urlValues">Les données extraites du presse-papier</param>
-        public virtual void Start(string[] urlValues) => Process.Start(GetFormattedUrl(urlValues));
+        public virtual void Start(IEnumerable<string> urlValues) => Process.Start(new ProcessStartInfo(GetFormattedUrl(urlValues)) { UseShellExecute = true } );
 
         /// <summary>
         /// Indique si l'action est activée
@@ -102,11 +104,11 @@
         /// Ouvre l'application avec les paramètres nécessaires
         /// </summary>
         /// <param name="urlValues"></param>
-        public override void Start(string[] urlValues)
+        public override void Start(IEnumerable<string> urlValues)
         {
             try
             {
-                string arguments = String.Format(this.Arguments, urlValues);
+                string arguments = String.Format(this.Arguments, urlValues.ToArray());
 
                 if (UseClipboard && arguments.Length > 30000)
                 {
@@ -131,9 +133,9 @@
     {
         public override bool CanCopy => false;
 
-        public override void Start(string[] urlValues)
+        public override void Start(IEnumerable<string> urlValues)
         {
-            string value = String.Format(this.Url, urlValues);
+            string value = String.Format(this.Url, urlValues.ToArray());
 
             Clipboard.SetText(value);
         }

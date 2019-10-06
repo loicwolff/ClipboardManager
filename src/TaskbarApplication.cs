@@ -403,12 +403,12 @@
             CloseNotifications?.Invoke(this, EventArgs.Empty);
         }
 
-        private QuickAction GetFirstQuickAction(bool copyOnly, out string[] urlValues)
+        private QuickAction GetFirstQuickAction(bool copyOnly, out IReadOnlyCollection<string> urlValues)
         {
             var rule = ClipboardRules.FirstOrDefault();
             if (rule != null)
             {
-                urlValues = rule.Values;
+                urlValues = rule.Values.ToArray();
 
                 var actions = rule.QuickActions.Where(a => a.IsEnabled);
 
@@ -428,7 +428,7 @@
 
         private void CopyFirstLink()
         {
-            var action = GetFirstQuickAction(true, out string[] urlValues);
+            var action = GetFirstQuickAction(true, out var urlValues);
 
             if (action != null)
             {
@@ -451,7 +451,7 @@
 
         private void OpenFirstAction()
         {
-            var action = GetFirstQuickAction(true, out string[] urlValues);
+            var action = GetFirstQuickAction(true, out var urlValues);
 
             action?.Start(urlValues);
         }
