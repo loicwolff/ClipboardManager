@@ -1,109 +1,106 @@
-﻿namespace ClipboardManager
+﻿using System.Drawing;
+using System.Runtime.InteropServices;
+using System.Windows.Forms;
+
+namespace ClipboardManager;
+
+public static class SafeClipboard
 {
-    using System;
-    using System.Drawing;
-    using System.Runtime.InteropServices;
-    using System.Windows.Forms;
-
-    public static class SafeClipboard
+    public static ClipItem CurrentClipItem
     {
-        public static ClipItem CurrentClipItem
+        get
         {
-            get
+            if (ContainsText())
             {
-                if (ContainsText())
-                {
-                    string text = GetText();
+                string text = GetText();
 
-                    return new ClipItem(String.IsNullOrWhiteSpace(text) ?
-                        String.Empty :
-                        text);
-                }
-                else
-                {
-                    return ClipItem.Empty;
-                }
+                return new ClipItem(string.IsNullOrWhiteSpace(text) ?
+                    string.Empty :
+                    text);
+            }
+            else
+            {
+                return ClipItem.Empty;
             }
         }
+    }
 
-        public static void SetImage(Image image)
+    public static void SetImage(Image image)
+    {
+        try
+        {
+            Clipboard.SetImage(image);
+        }
+        catch (ExternalException)
+        {
+            // retry
+            Clipboard.SetImage(image);
+        }
+    }
+
+    public static void SetText(string? text)
+    {
+        if (!string.IsNullOrWhiteSpace(text))
         {
             try
             {
-                Clipboard.SetImage(image);
+                Clipboard.SetText(text, TextDataFormat.Text);
             }
             catch (ExternalException)
             {
                 // retry
-                Clipboard.SetImage(image);
-            }
-
-        }
-
-        public static void SetText(string? text)
-        {
-            if (!String.IsNullOrWhiteSpace(text))
-            {
-                try
-                {
-                    Clipboard.SetText(text, TextDataFormat.Text);
-                }
-                catch (ExternalException)
-                {
-                    // retry
-                    Clipboard.SetText(text, TextDataFormat.Text);
-                }
+                Clipboard.SetText(text, TextDataFormat.Text);
             }
         }
+    }
 
-        public static void Clear() => Clipboard.Clear();
+    public static void Clear() => Clipboard.Clear();
 
-        public static bool ContainsText()
+    public static bool ContainsText()
+    {
+        try
         {
-            try
-            {
-                return Clipboard.ContainsText();
-            }
-            catch (ExternalException)
-            {
-                return Clipboard.ContainsText();
-            }
+            return Clipboard.ContainsText();
         }
-
-        public static string GetText()
+        catch (ExternalException)
         {
-            try
-            {
-                return Clipboard.GetText();
-            }
-            catch (ExternalException)
-            {
-                return Clipboard.GetText();
-            }
+            return Clipboard.ContainsText();
         }
+    }
 
-        public static bool ContainsImage()
+    public static string GetText()
+    {
+        try
         {
-            try
-            {
-                return Clipboard.ContainsImage();
-            }
-            catch (ExternalException)
-            {
-                return Clipboard.ContainsImage();
-            }
+            return Clipboard.GetText();
         }
-
-        public static Image GetImage()
+        catch (ExternalException)
         {
-            try
-            {
-                return Clipboard.GetImage();
-            }
-            catch (ExternalException)
-            {
-                return Clipboard.GetImage();
-            }
+            return Clipboard.GetText();
+        }
+    }
+
+    public static bool ContainsImage()
+    {
+        try
+        {
+            return Clipboard.ContainsImage();
+        }
+        catch (ExternalException)
+        {
+            return Clipboard.ContainsImage();
+        }
+    }
+
+    public static Image? GetImage()
+    {
+        try
+        {
+            return Clipboard.GetImage();
+        }
+        catch (ExternalException)
+        {
+            return Clipboard.GetImage();
         }
     }
 }

@@ -1,7 +1,7 @@
-﻿namespace ClipboardManager
+﻿namespace ClipboardManager;
+
+partial class NotificationForm
 {
-    partial class NotificationForm
-    {
         /// <summary>
         /// Required designer variable.
         /// </summary>
@@ -94,4 +94,3 @@
         private NonSelectableButton CopyLinkButton;
 
     }
-}

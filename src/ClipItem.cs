@@ -1,36 +1,30 @@
-﻿namespace ClipboardManager
+﻿using System.Diagnostics;
+using System.Text.Json.Serialization;
+
+namespace ClipboardManager;
+
+[DebuggerDisplay("Text = {Text}")]
+public class ClipItem
 {
-    using System;
-    using System.Diagnostics;
-    using Newtonsoft.Json;
+    public static readonly ClipItem Empty = new(text: string.Empty);
 
-    [DebuggerDisplay("Text = {Text}")]
-    public class ClipItem
+    [JsonConstructor]
+    public ClipItem(string text)
     {
-        public static readonly ClipItem Empty = new ClipItem(text: string.Empty);
-
-        protected ClipItem()
-        {
-
-        }
-
-        public ClipItem(string text)
-        {
-            this.Text = text;
-        }
-
-        [JsonProperty("text")]
-        public string? Text { get; }
-
-        [JsonIgnore]
-        public bool IsEmpty => string.IsNullOrWhiteSpace(this.Text);
-
-        public override bool Equals(object? obj) => obj is ClipItem clipItem && clipItem.Text == this.Text;
-
-        public override int GetHashCode() => HashCode.Combine(this.Text);
-
-        public static bool operator ==(ClipItem? c1, ClipItem? c2) => Equals(c1, c2);
-
-        public static bool operator !=(ClipItem? c1, ClipItem? c2) => !Equals(c1, c2);
+        this.Text = text;
     }
+
+    [JsonPropertyName("text")]
+    public string? Text { get; }
+
+    [JsonIgnore]
+    public bool IsEmpty => string.IsNullOrWhiteSpace(this.Text);
+
+    public override bool Equals(object? obj) => obj is ClipItem clipItem && clipItem.Text == this.Text;
+
+    public override int GetHashCode() => HashCode.Combine(this.Text);
+
+    public static bool operator ==(ClipItem? c1, ClipItem? c2) => Equals(c1, c2);
+
+    public static bool operator !=(ClipItem? c1, ClipItem? c2) => !Equals(c1, c2);
 }

@@ -1,9 +1,8 @@
 ﻿using System.Windows.Forms;
 
-namespace ClipboardManager
+namespace ClipboardManager;
+
+internal class NonSelectableButton : Button
 {
-    internal class NonSelectableButton : Button
-    {
-        public NonSelectableButton() => this.SetStyle(ControlStyles.Selectable, false);
-    }
+    public NonSelectableButton() => this.SetStyle(ControlStyles.Selectable, false);
 }

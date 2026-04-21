@@ -7,4 +7,4 @@
 [assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1055:Uri return values should not be strings")]
 [assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Globalization", "CA1303:Do not pass literals as localized parameters")]
 [assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1056:Uri properties should not be strings")]
-[assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Reliability", "CA2000:Dispose objects before losing scope", Justification = "<Pending>", Scope = "member", Target = "~M:ClipboardManager.QuickActionToolStripItem.#ctor(ClipboardManager.RuleResult,System.Int32)")]
+[assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Reliability", "CA2000:Dispose objects before losing scope", Justification = "Controls are owned by the parent panel.", Scope = "member", Target = "~M:ClipboardManager.QuickActionToolStripItem.#ctor(ClipboardManager.RuleResult,System.Int32)")]

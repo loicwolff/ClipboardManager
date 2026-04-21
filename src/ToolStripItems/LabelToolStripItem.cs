@@ -1,18 +1,17 @@
-﻿namespace ClipboardManager
-{
-    using System.Drawing;
-    using System.Windows.Forms;
+﻿using System.Drawing;
+using System.Windows.Forms;
 
-    class LabelToolStripItem : ToolStripControlHost
+namespace ClipboardManager;
+
+class LabelToolStripItem : ToolStripControlHost
+{
+    public LabelToolStripItem(string text) : base(new Label())
     {
-        public LabelToolStripItem(string text) : base(new Label())
+        if (this.Control is Label label)
         {
-            if (this.Control is Label label)
-            {
-                label.Text = text;
-                label.BackColor = Color.Transparent;
-                label.ForeColor = Color.Gray;
-            }
+            label.Text = text;
+            label.BackColor = Color.Transparent;
+            label.ForeColor = Color.Gray;
         }
     }
 }
