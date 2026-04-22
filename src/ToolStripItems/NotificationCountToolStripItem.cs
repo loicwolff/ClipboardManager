@@ -1,85 +1,83 @@
-﻿namespace ClipboardManager
+﻿using System.Drawing;
+using System.Globalization;
+using System.Windows.Forms;
+
+namespace ClipboardManager;
+
+public class NotificationCountToolStripItem : ToolStripControlHost
 {
-    using System;
-    using System.Drawing;
-    using System.Globalization;
-    using System.Windows.Forms;
+    public event NotificationCountEventHandler? ValueChanged;
 
-    public class NotificationCountToolStripItem : ToolStripControlHost
+    public NotificationCountToolStripItem(int currentSelection)
+        : base(new FlowLayoutPanel())
     {
-        public event NotificationCountEventHandler? ValueChanged;
-
-        public NotificationCountToolStripItem(int currentSelection)
-            : base(new FlowLayoutPanel())
+        if (this.Control is FlowLayoutPanel mainPanel)
         {
-            if (this.Control is FlowLayoutPanel mainPanel)
-            {
-                mainPanel.BackColor = Color.Transparent;
-                mainPanel.FlowDirection = FlowDirection.TopDown;
-                mainPanel.AutoSize = false;
-                mainPanel.Size = new System.Drawing.Size(100, 10);
-                mainPanel.MinimumSize = mainPanel.Size;
+            mainPanel.BackColor = Color.Transparent;
+            mainPanel.FlowDirection = FlowDirection.TopDown;
+            mainPanel.AutoSize = false;
+            mainPanel.Size = new System.Drawing.Size(100, 10);
+            mainPanel.MinimumSize = mainPanel.Size;
 
-                var radioButtonPanel = new FlowLayoutPanel
+            var radioButtonPanel = new FlowLayoutPanel
+            {
+                BackColor = Color.Transparent,
+                FlowDirection = FlowDirection.LeftToRight,
+                AutoSize = false,
+                Height = 45,
+                Margin = new Padding(0),
+                Padding = new Padding(0)
+            };
+
+            for (int i = 1; i <= 5; i++)
+            {
+                var radioButton = new RadioButton()
                 {
                     BackColor = Color.Transparent,
-                    FlowDirection = FlowDirection.LeftToRight,
-                    AutoSize = false,
+                    Text = i.ToString(CultureInfo.InvariantCulture),
+                    Width = 40,
                     Height = 45,
-                    Margin = new Padding(0),
-                    Padding = new Padding(0)
+                    Checked = currentSelection == i,
+                    Tag = i,
+                    Enabled = this.Enabled,
                 };
 
-                for (int i = 1; i <= 5; i++)
-                {
-                    var radioButton = new RadioButton()
-                    {
-                        BackColor = Color.Transparent,
-                        Text = i.ToString(CultureInfo.InvariantCulture),
-                        Width = 40,
-                        Height = 45,
-                        Checked = currentSelection == i,
-                        Tag = i,
-                        Enabled = this.Enabled,
-                    };
+                radioButton.CheckedChanged += this.OnRadioButtonCheckedChanged;
 
-                    radioButton.CheckedChanged += this.OnRadioButtonCheckedChanged;
-
-                    radioButtonPanel.Controls.Add(radioButton);
-                }
-
-                var maxNotificationLabel = new Label
-                {
-                    Text = "Max Notifications Count",
-                    ForeColor = Color.Gray,
-                    BackColor = Color.Transparent,
-                    Height = 20,
-                    Width = 250,
-                };
-
-                mainPanel.Controls.Add(maxNotificationLabel);
-                mainPanel.Controls.Add(radioButtonPanel);
+                radioButtonPanel.Controls.Add(radioButton);
             }
-        }
 
-        void OnRadioButtonCheckedChanged(object? sender, EventArgs e)
-        {
-            if (sender is RadioButton radioButton && radioButton.Tag is int notificationCount)
+            var maxNotificationLabel = new Label
             {
-                ValueChanged?.Invoke(this, new NotificationCountEventArgs(notificationCount));
-            }
+                Text = "Max Notifications Count",
+                ForeColor = Color.Gray,
+                BackColor = Color.Transparent,
+                Height = 20,
+                Width = 250,
+            };
+
+            mainPanel.Controls.Add(maxNotificationLabel);
+            mainPanel.Controls.Add(radioButtonPanel);
         }
     }
 
-    public delegate void NotificationCountEventHandler(object sender, NotificationCountEventArgs e);
-
-    public class NotificationCountEventArgs : EventArgs
+    void OnRadioButtonCheckedChanged(object? sender, EventArgs e)
     {
-        public int NotificationCount { get; set; }
-
-        public NotificationCountEventArgs(int count)
+        if (sender is RadioButton radioButton && radioButton.Tag is int notificationCount)
         {
-            this.NotificationCount = count;
+            ValueChanged?.Invoke(this, new NotificationCountEventArgs(notificationCount));
         }
+    }
+}
+
+public delegate void NotificationCountEventHandler(object sender, NotificationCountEventArgs e);
+
+public class NotificationCountEventArgs : EventArgs
+{
+    public int NotificationCount { get; set; }
+
+    public NotificationCountEventArgs(int count)
+    {
+        this.NotificationCount = count;
     }
 }
